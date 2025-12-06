@@ -1,0 +1,34 @@
+[
+  {
+    "id_usuario": "68c5dba3-ec11-434d-9f21-ca12074e9098",
+    "username": "Alex",
+    "correo": "aleax@gmail.com",
+    "fecha_registro": "2025-11-20T13:33:52",
+    "ultimo_acceso": "2025-11-20T13:38:56",
+    "rol_id": 1,
+    "activo": true,
+    "nombre_completo": null,
+    "telefono": null,
+    "ubicacion": null,
+    "fecha_nacimiento": null,
+    "descripcion": null,
+    "preferencias": null,
+    "avatar_url": null
+  },
+  {
+    "id_usuario": "fa1eeeab-b866-4a2b-a1f9-6d6aa15a8103",
+    "username": "johanqui302006",
+    "correo": "johanqui302006@gmail.com",
+    "fecha_registro": "2025-11-20T13:32:56",
+    "ultimo_acceso": null,
+    "rol_id": 2,
+    "activo": true,
+    "nombre_completo": "Johan Alejandro Quintero barros",
+    "telefono": null,
+    "ubicacion": null,
+    "fecha_nacimiento": null,
+    "descripcion": null,
+    "preferencias": null,
+    "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocLK8H8BQ0ZlNfz8qG97EVN2kblEWz9Kxyq9De9GbgSDVX4vbQ=s96-c"
+  }
+]

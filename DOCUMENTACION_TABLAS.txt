@@ -1,0 +1,841 @@
+================================================================================
+DOCUMENTACION COMPLETA - TABLAS, RUTAS Y JSON - PROYECTO SYNAPSE
+================================================================================
+
+BASE DE DATOS: synapse_db (MySQL)
+BACKEND: Flask (Python) - app/routes/ y app/controllers/
+FRONTEND: React - frontend/src/pages/ y frontend/src/services/
+AUTENTICACION: JWT Token (Authorization: Bearer <token>)
+
+================================================================================
+TABLA 1: USUARIO
+================================================================================
+Descripción: Almacena información de usuarios del sistema, autenticación y perfil.
+
+Campos principales:
+  - id_usuario: UUID (PK)
+  - username: String(100), único
+  - correo: String(100), único, requerido para login
+  - password: String(255), hasheada con werkzeug
+  - nombre_completo: String(200), opcional
+  - telefono: String(20), opcional
+  - celular: String(15), opcional
+  - ubicacion: String(200), opcional
+  - fecha_nacimiento: Date, opcional
+  - descripcion: Text, opcional
+  - avatar_url: String(255), URL de imagen
+  - rol_id: Integer (FK -> rol.id)
+  - fecha_registro: DateTime
+  - ultimo_acceso: DateTime
+  - activo: Boolean (default True)
+  - preferencias: JSON, opcional
+
+Relaciones:
+  - Rol (N:1): cada usuario tiene un rol
+  - Tarea (1:N): usuario crea tareas
+  - Sesion (1:N): usuario realiza sesiones
+  - Progreso (1:N): usuario tiene registro diario de progreso
+  - UsuarioSala (1:N): usuario participa en salas
+  - RecompensaUsuario (1:N): usuario obtiene recompensas
+  - EstadoAnimo (1:N): usuario registra su estado de ánimo
+
+Rutas Backend:
+  POST /api/auth/register - Registrar nuevo usuario
+  POST /api/auth/login - Login y obtener JWT token
+  GET /api/auth/me - Info del usuario actual (requiere JWT)
+  PUT /api/auth/me - Actualizar perfil del usuario (requiere JWT)
+  POST /api/auth/change-password - Cambiar contraseña
+  GET /api/usuarios - Listar todos los usuarios (admin)
+  GET /api/usuarios/<id> - Obtener usuario específico
+  PUT /api/usuarios/<id> - Actualizar usuario (admin)
+  DELETE /api/usuarios/<id> - Eliminar usuario (admin)
+
+JSON Frontend -> Backend (Login):
+  {
+    "correo": "usuario@email.com",
+    "password": "contraseña123"
+  }
+
+JSON Frontend -> Backend (Registro):
+  {
+    "username": "juan_perez",
+    "correo": "juan@email.com",
+    "password": "segura123"
+  }
+
+JSON Backend -> Frontend (Respuesta Login exitosa):
+  {
+    "access_token": "eyJ0eXAiOiJKV1Q...",
+    "usuario": {
+      "id_usuario": "uuid-string",
+      "username": "juan_perez",
+      "correo": "juan@email.com",
+      "nombre_completo": "Juan Pérez",
+      "avatar_url": "https://...",
+      "rol_id": 2,
+      "fecha_registro": "2025-01-15T10:30:00"
+    }
+  }
+
+JSON Backend -> Frontend (GET /auth/me):
+  {
+    "id_usuario": "uuid-string",
+    "username": "juan_perez",
+    "correo": "juan@email.com",
+    "nombre_completo": "Juan Pérez",
+    "telefono": "+1234567890",
+    "ubicacion": "Bogotá",
+    "descripcion": "Estudiante de ingeniería",
+    "avatar_url": "https://...",
+    "rol_id": 2,
+    "activo": true
+  }
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Login.jsx - Login
+  - frontend/src/pages/Register.jsx - Registro
+  - frontend/src/pages/Profile.jsx - Ver/editar perfil
+  - frontend/src/services/auth.js - Funciones de autenticación
+  - frontend/src/services/api.js - Interceptor JWT en headers
+
+================================================================================
+TABLA 2: ROL
+================================================================================
+Descripción: Define los roles/permisos del sistema (usuario, admin, moderador, etc).
+
+Campos principales:
+  - id: Integer (PK), autoincrement
+  - nombre: String(50), único
+
+Valores predefinidos en BD:
+  - 1: admin
+  - 2: usuario
+  - 3: moderador
+  - 4: instructor
+
+Relaciones:
+  - Usuario (1:N): múltiples usuarios pueden tener el mismo rol
+
+Rutas Backend:
+  GET /api/roles - Listar todos los roles (admin)
+  POST /api/roles - Crear nuevo rol (admin)
+
+JSON Backend -> Frontend (GET /roles):
+  [
+    { "id": 1, "nombre": "admin" },
+    { "id": 2, "nombre": "usuario" },
+    { "id": 3, "nombre": "moderador" }
+  ]
+
+Frontend - Ubicación y uso:
+  - Asignación de roles en panel de administración
+  - Verificación de permisos con JWT claims
+
+================================================================================
+TABLA 3: TAREA
+================================================================================
+Descripción: Almacena tareas que crean los usuarios para organizar su trabajo.
+
+Campos principales:
+  - id_tarea: UUID (PK)
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - sala_id: UUID (FK -> sala.id_sala), opcional (tarea personal o de sala)
+  - titulo: String(200), requerido
+  - descripcion: Text, opcional
+  - estado: String(20) - valores: 'pendiente', 'en_progreso', 'completada'
+  - completada: Boolean (default False)
+  - prioridad: String(20) - valores: 'baja', 'media', 'alta'
+  - fecha_creacion: DateTime
+  - fecha_vencimiento: Date, opcional
+  - comentario: Text, opcional
+
+Relaciones:
+  - Usuario (N:1): cada tarea pertenece a un usuario
+  - Sala (N:1): tarea puede estar en una sala (opcional)
+
+Rutas Backend:
+  GET /api/tareas - Listar tareas del usuario (requiere JWT)
+  GET /api/tareas?estado=pendiente - Filtrar por estado
+  GET /api/tareas/<id> - Obtener tarea específica
+  POST /api/tareas - Crear nueva tarea
+  PUT /api/tareas/<id> - Actualizar tarea
+  DELETE /api/tareas/<id> - Eliminar tarea
+  PATCH /api/tareas/<id>/completar - Marcar como completada
+
+JSON Frontend -> Backend (POST /tareas):
+  {
+    "titulo": "Estudiar React",
+    "descripcion": "Aprender hooks y context",
+    "prioridad": "alta",
+    "fecha_vencimiento": "2025-12-31",
+    "sala_id": "uuid-sala" (opcional)
+  }
+
+JSON Backend -> Frontend (GET /tareas):
+  [
+    {
+      "id_tarea": "uuid",
+      "usuario_id": "uuid",
+      "titulo": "Estudiar React",
+      "descripcion": "Aprender hooks y context",
+      "estado": "en_progreso",
+      "completada": false,
+      "prioridad": "alta",
+      "fecha_creacion": "2025-01-15T10:00:00",
+      "fecha_vencimiento": "2025-12-31",
+      "comentario": null,
+      "sala_id": null
+    }
+  ]
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Tareas.jsx - CRUD de tareas
+  - frontend/src/pages/HomePageLogueado.jsx - Resumen de tareas pendientes
+  - frontend/src/services/tareas.jsx - Funciones API para tareas
+  - Llamada fetch: api.get('/tareas'), api.post('/tareas', payload), etc.
+
+================================================================================
+TABLA 4: SALA
+================================================================================
+Descripción: Salas de estudio grupal donde usuarios colaboran en sesiones compartidas.
+
+Campos principales:
+  - id_sala: UUID (PK)
+  - nombre: String(100), requerido
+  - descripcion: Text, opcional
+  - creador_id: UUID (FK -> usuario.id_usuario)
+  - fecha_creacion: DateTime
+  - max_participantes: Integer, opcional
+  - es_privada: Boolean (default False)
+  - codigo_acceso: String(6), opcional (para salas privadas)
+  - estado: String(20) - valores: 'activa', 'cerrada'
+
+Relaciones:
+  - Usuario (N:1): cada sala tiene un creador
+  - UsuarioSala (1:N): múltiples usuarios en una sala
+  - SalaSesion (1:N): sesiones realizadas en la sala
+  - Tarea (1:N): tareas asociadas a la sala
+
+Rutas Backend:
+  GET /api/salas - Listar todas las salas (públicas)
+  GET /api/salas/publicas - Listar salas públicas filtradas
+  GET /api/salas/mis-salas - Salas del usuario actual
+  GET /api/salas/<id> - Obtener sala específica
+  POST /api/salas - Crear nueva sala
+  PUT /api/salas/<id> - Actualizar sala (solo creador)
+  DELETE /api/salas/<id> - Eliminar sala (solo creador)
+  POST /api/salas/unirse - Unirse a una sala con código
+  POST /api/salas/<id>/salir - Salir de una sala
+
+JSON Frontend -> Backend (POST /salas):
+  {
+    "nombre": "Estudio Inglés",
+    "descripcion": "Sala para practicar inglés",
+    "es_privada": false,
+    "max_participantes": 10
+  }
+
+JSON Backend -> Frontend (GET /salas/publicas):
+  [
+    {
+      "id_sala": "uuid",
+      "nombre": "Estudio Inglés",
+      "descripcion": "Sala para practicar inglés",
+      "creador_id": "uuid",
+      "fecha_creacion": "2025-01-10T15:30:00",
+      "max_participantes": 10,
+      "es_privada": false,
+      "codigo_acceso": null,
+      "estado": "activa"
+    }
+  ]
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Salas.jsx - Listar y crear salas
+  - frontend/src/pages/SalaDetalle.jsx - Detalles de sala
+  - frontend/src/services/sala.jsx - Funciones API
+  - Llamada fetch: api.get('/salas/publicas'), api.post('/salas', payload)
+
+================================================================================
+TABLA 5: SESION
+================================================================================
+Descripción: Registra sesiones de estudio/meditación/pomodoro realizadas por usuarios.
+
+Campos principales:
+  - id_sesion: UUID (PK)
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - tecnica_id: UUID (FK -> tecnica.id_tecnica)
+  - fecha_inicio: DateTime
+  - fecha_fin: DateTime, opcional
+  - duracion_real: Integer (segundos/minutos), opcional
+  - estado: String(20) - valores: 'iniciada', 'completada', 'cancelada'
+  - es_grupal: Boolean (default False)
+
+Relaciones:
+  - Usuario (N:1): cada sesión pertenece a un usuario
+  - Tecnica (N:1): cada sesión usa una técnica
+  - SalaSesion (1:N): sesión puede ser grupal en una sala
+
+Rutas Backend:
+  GET /api/sesiones - Listar sesiones del usuario
+  GET /api/sesiones/<id> - Obtener sesión específica
+  POST /api/sesiones - Crear nueva sesión
+  PUT /api/sesiones/<id> - Actualizar sesión
+  POST /productividad/pomodoro/iniciar - Iniciar sesión pomodoro
+  POST /productividad/pomodoro/finalizar - Finalizar sesión pomodoro
+  GET /productividad/pomodoro/estado - Ver estado actual
+  POST /bienestar/meditacion/iniciar - Iniciar meditación
+  POST /bienestar/meditacion/finalizar - Finalizar meditación
+  GET /bienestar/meditacion/historial - Historial de meditaciones
+
+JSON Frontend -> Backend (POST /sesiones):
+  {
+    "tecnica_id": "uuid-tecnica",
+    "duracion_planificada": 25,
+    "es_grupal": false
+  }
+
+JSON Backend -> Frontend (GET /sesiones):
+  [
+    {
+      "id_sesion": "uuid",
+      "usuario_id": "uuid",
+      "tecnica_id": "uuid",
+      "fecha_inicio": "2025-01-15T14:00:00",
+      "fecha_fin": "2025-01-15T14:25:00",
+      "duracion_real": 25,
+      "estado": "completada",
+      "completada": true,
+      "es_grupal": false
+    }
+  ]
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Pomodoro.jsx - Sesiones pomodoro
+  - frontend/src/pages/Meditacion.jsx - Sesiones de meditación
+  - frontend/src/services/pomodoro_service.js - Funciones pomodoro
+  - frontend/src/services/meditacion_simple.js - Funciones meditación
+  - Llamadas: api.post('/productividad/pomodoro/iniciar')
+
+================================================================================
+TABLA 6: TECNICA
+================================================================================
+Descripción: Técnicas de estudio/meditación disponibles en el sistema (Pomodoro, etc).
+
+Campos principales:
+  - id_tecnica: UUID (PK)
+  - nombre: String(100), requerido
+  - descripcion: Text, opcional
+  - duracion_estimada: Integer (minutos)
+  - categoria: String(50) - valores: 'pomodoro', 'meditacion', 'otra'
+
+Técnicas predefinidas (seed):
+  - Pomodoro Clásico: 25 min trabajo, 5 min descanso
+  - Pomodoro Extendido: 45 min trabajo, 15 min descanso
+  - Técnica 52-17: 52 min trabajo, 17 min descanso
+  - Meditación Guiada: 10-30 min
+  - Mindfulness: variable
+
+Relaciones:
+  - Sesion (1:N): múltiples sesiones usan una técnica
+
+Rutas Backend:
+  GET /api/tecnicas - Listar todas las técnicas
+  GET /api/tecnicas/<id> - Obtener técnica específica
+  POST /api/tecnicas - Crear nueva técnica (admin)
+  PUT /api/tecnicas/<id> - Actualizar técnica (admin)
+  DELETE /api/tecnicas/<id> - Eliminar técnica (admin)
+
+JSON Backend -> Frontend (GET /tecnicas):
+  [
+    {
+      "id_tecnica": "uuid",
+      "nombre": "Pomodoro Clásico",
+      "descripcion": "Técnica de 25 min trabajo, 5 min descanso",
+      "duracion_estimada": 25,
+      "categoria": "pomodoro"
+    },
+    {
+      "id_tecnica": "uuid",
+      "nombre": "Meditación Guiada",
+      "descripcion": "Sesión guiada de mindfulness",
+      "duracion_estimada": 20,
+      "categoria": "meditacion"
+    }
+  ]
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Pomodoro.jsx - Seleccionar técnica pomodoro
+  - frontend/src/pages/Meditacion.jsx - Seleccionar tipo meditación
+  - Llamada fetch: api.get('/tecnicas')
+
+================================================================================
+TABLA 7: RECOMPENSA
+================================================================================
+Descripción: Recompensas que usuarios pueden desbloquear acumulando puntos.
+
+Campos principales:
+  - id_recompensa: UUID (PK)
+  - nombre: String(100), requerido
+  - descripcion: Text, opcional
+  - puntos_requeridos: Integer
+  - tipo: String(50) - valores: 'descuento', 'acceso', 'insignia', 'premium'
+  - valor: Integer (porcentaje descuento, días acceso, etc)
+  - requisitos: JSON (condiciones para desbloquear)
+
+Recompensas predefinidas (ejemplos):
+  - Descuento 10% Premium: 500 puntos
+  - Tema oscuro desbloqueado: 200 puntos
+  - Insignia Maestro: 1000 puntos
+
+Relaciones:
+  - RecompensaUsuario (1:N): usuarios obtienen recompensas
+
+Rutas Backend:
+  GET /api/recompensas - Listar todas las recompensas
+  GET /api/recompensas/disponibles - Recompensas disponibles para usuario actual
+  GET /api/recompensas/mis-recompensas - Recompensas obtenidas del usuario
+  GET /api/recompensas/<id> - Obtener recompensa específica
+  POST /api/recompensas - Crear nueva recompensa (admin)
+  PUT /api/recompensas/<id> - Actualizar recompensa (admin)
+  DELETE /api/recompensas/<id> - Eliminar recompensa (admin)
+  POST /api/recompensas/otorgar - Otorgar recompensa a usuario
+
+JSON Frontend -> Backend (POST /recompensas/otorgar):
+  {
+    "recompensa_id": "uuid",
+    "usuario_id": "uuid" (opcional, default usuario actual)
+  }
+
+JSON Backend -> Frontend (GET /recompensas/disponibles):
+  [
+    {
+      "id_recompensa": "uuid",
+      "nombre": "Tema Oscuro",
+      "descripcion": "Desbloquea tema oscuro",
+      "puntos_requeridos": 200,
+      "tipo": "acceso",
+      "valor": 1,
+      "requisitos": { "sesiones_minimas": 10 }
+    }
+  ]
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Recompensas.jsx - Tienda de recompensas
+  - frontend/src/pages/Profile.jsx - Ver recompensas obtenidas
+  - frontend/src/services/recompensa.jsx - Funciones API
+  - Llamada fetch: api.get('/recompensas/disponibles')
+
+================================================================================
+TABLA 8: PROGRESO
+================================================================================
+Descripción: Registro diario del progreso del usuario (tareas, sesiones, puntos).
+
+Campos principales:
+  - id_progreso: UUID (PK)
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - fecha: Date (clave compuesta con usuario_id)
+  - tareas_completadas: Integer (cantidad por día)
+  - sesiones_completadas: Integer (cantidad por día)
+  - puntos_acumulados: Integer (total del día)
+  - minutos_estudio: Integer (total de minutos)
+  - sesiones_realizadas: Integer
+
+Relaciones:
+  - Usuario (N:1): cada usuario tiene múltiples registros de progreso
+
+Rutas Backend:
+  GET /api/progreso - Progreso del usuario actual
+  GET /api/progreso/<usuario_id> - Progreso de usuario específico (admin)
+  GET /api/progreso?fecha_inicio=2025-01-01&fecha_fin=2025-01-31 - Progreso rango
+  GET /api/estadisticas - Dashboard con estadísticas
+  GET /api/estadisticas/weekly - Estadísticas semanales
+  GET /api/estadisticas/monthly - Estadísticas mensuales
+
+JSON Backend -> Frontend (GET /progreso):
+  [
+    {
+      "id_progreso": "uuid",
+      "usuario_id": "uuid",
+      "fecha": "2025-01-15",
+      "tareas_completadas": 3,
+      "sesiones_completadas": 2,
+      "puntos_acumulados": 150,
+      "minutos_estudio": 50,
+      "sesiones_realizadas": 2
+    }
+  ]
+
+JSON Backend -> Frontend (GET /estadisticas):
+  {
+    "overview": {
+      "puntos_totales": 1500,
+      "nivel": 5,
+      "racha_dias": 7
+    },
+    "weekly": {
+      "sesiones": [0, 2, 3, 2, 4, 1, 2],
+      "puntos": [50, 100, 150, 100, 200, 50, 100]
+    },
+    "habits": {
+      "sesiones_completadas": 15,
+      "promedio_duracion": 25
+    },
+    "mood": {
+      "promedio": 4.2,
+      "tendencia": "mejorando"
+    }
+  }
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/HomePageLogueado.jsx - Dashboard general
+  - frontend/src/pages/Estadisticas.jsx - Gráficos de progreso
+  - frontend/src/components/ProgressChart.jsx - Gráficos
+  - Llamada fetch: api.get('/progreso'), api.get('/estadisticas')
+
+================================================================================
+TABLA 9: ESTADO_ANIMO
+================================================================================
+Descripción: Registro de estado de ánimo del usuario (1-5 escala).
+
+Campos principales:
+  - id_estado: UUID (PK)
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - valor: Integer (1-5)
+  - nota: Text, opcional
+  - creado_en: DateTime
+
+Relaciones:
+  - Usuario (N:1): cada usuario puede registrar múltiples estados de ánimo
+
+Rutas Backend:
+  GET /api/estado-animo/historial - Historial del usuario actual
+  GET /api/estado-animo/historial?days=14 - Últimos N días
+  GET /api/estado-animo/<id> - Obtener estado específico
+  POST /api/estado-animo - Registrar nuevo estado de ánimo
+  PUT /api/estado-animo/<id> - Actualizar registro
+  DELETE /api/estado-animo/<id> - Eliminar registro
+  POST /api/dashboard/mood - Endpoint alternativo (dashboard_routes)
+  GET /api/dashboard/mood - Listar estados (dashboard_routes)
+
+JSON Frontend -> Backend (POST /estado-animo):
+  {
+    "valor": 4,
+    "nota": "Me siento motivado hoy"
+  }
+
+JSON Backend -> Frontend (GET /estado-animo/historial):
+  {
+    "history": [
+      { "date": "2025-01-15", "avg": 4.2 },
+      { "date": "2025-01-14", "avg": 3.8 }
+    ],
+    "entries": [
+      {
+        "id_estado": "uuid",
+        "usuario_id": "uuid",
+        "valor": 4,
+        "nota": "Me siento motivado hoy",
+        "creado_en": "2025-01-15T10:30:00"
+      }
+    ],
+    "count": 2
+  }
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/HomePageLogueado.jsx - Gráfico de estado de ánimo
+  - frontend/src/pages/MoodTracker.jsx - Registrar estado
+  - Llamada fetch: api.get('/estado-animo/historial?days=14')
+
+================================================================================
+TABLA 10: USUARIO_SALA
+================================================================================
+Descripción: Relación de muchos-a-muchos entre usuarios y salas (quién participa donde).
+
+Campos principales:
+  - id: Integer (PK), autoincrement
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - sala_id: UUID (FK -> sala.id_sala)
+  - fecha_unirse: DateTime
+  - rol_sala: String(20) - valores: 'creador', 'moderador', 'participante'
+  - activo: Boolean
+
+Relaciones:
+  - Usuario (N:1)
+  - Sala (N:1)
+
+Rutas Backend: (No suele tener endpoints directos, se maneja a través de /salas/unirse)
+  POST /api/salas/unirse - Agregar usuario a sala
+  POST /api/salas/<id>/salir - Remover usuario de sala
+
+JSON Frontend -> Backend (POST /salas/unirse):
+  {
+    "codigo_acceso": "ABCD12" (para salas privadas)
+  }
+  O mediante ruta: POST /api/salas/<sala_id>/join
+
+Frontend - Ubicación y uso:
+  - Gestión automática al crear/unirse a sala
+  - frontend/src/pages/Salas.jsx
+
+================================================================================
+TABLA 11: RECOMPENSA_USUARIO
+================================================================================
+Descripción: Relación usuario-recompensa para trackear qué recompensas ha obtenido cada usuario.
+
+Campos principales:
+  - id: Integer (PK), autoincrement
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - recompensa_id: UUID (FK -> recompensa.id_recompensa)
+  - fecha_obtenida: DateTime
+  - estado: String(20) - valores: 'desbloqueada', 'usada', 'expirada'
+
+Relaciones:
+  - Usuario (N:1)
+  - Recompensa (N:1)
+
+Rutas Backend: (Gestión vía /recompensas/...)
+  GET /api/recompensas/mis-recompensas - Ver recompensas de usuario
+  POST /api/recompensas/otorgar - Otorgar recompensa
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Profile.jsx - Ver recompensas desbloqueadas
+  - frontend/src/pages/Recompensas.jsx - Tienda
+
+================================================================================
+TABLA 12: SESION_TECNICA_PARAM
+================================================================================
+Descripción: Parámetros personalizados de técnicas para sesiones específicas.
+
+Campos principales:
+  - id: Integer (PK), autoincrement
+  - sesion_id: UUID (FK -> sesion.id_sesion)
+  - parametro: String(100) - ej: 'duracion_trabajo', 'duracion_descanso'
+  - valor: String(100) - valor del parámetro
+
+Relaciones:
+  - Sesion (N:1)
+
+Rutas Backend:
+  No suele exponerse directamente, se maneja como parte de sesión
+
+Frontend - Ubicación y uso:
+  - Almacenar configuración de pomodoro/meditación
+  - frontend/src/pages/Pomodoro.jsx - config personalizada
+
+================================================================================
+TABLA 13: SALA_SESION
+================================================================================
+Descripción: Relación sesión-sala para sesiones grupales realizadas en una sala.
+
+Campos principales:
+  - id: Integer (PK), autoincrement
+  - sala_id: UUID (FK -> sala.id_sala)
+  - sesion_id: UUID (FK -> sesion.id_sesion)
+  - timestamp_inicio: DateTime
+
+Relaciones:
+  - Sala (N:1)
+  - Sesion (N:1)
+
+Rutas Backend:
+  GET /api/salas/<sala_id>/sesiones - Sesiones realizadas en una sala
+
+Frontend - Ubicación y uso:
+  - Ver sesiones grupales de una sala
+  - Historial de la sala
+
+================================================================================
+TABLA 14: MENSAJE_SALA
+================================================================================
+Descripción: Mensajes de chat en las salas (comunicación entre usuarios).
+
+Campos principales:
+  - id_mensaje: UUID (PK)
+  - sala_id: UUID (FK -> sala.id_sala)
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - contenido: Text
+  - fecha_envio: DateTime
+  - editado: Boolean
+
+Relaciones:
+  - Sala (N:1)
+  - Usuario (N:1)
+
+Rutas Backend:
+  GET /api/salas/<sala_id>/mensajes - Listar mensajes de una sala
+  POST /api/salas/<sala_id>/mensajes - Enviar mensaje
+  PUT /api/salas/<sala_id>/mensajes/<id> - Editar mensaje
+  DELETE /api/salas/<sala_id>/mensajes/<id> - Eliminar mensaje
+
+JSON Frontend -> Backend (POST /salas/<sala_id>/mensajes):
+  {
+    "contenido": "¡Hola a todos!"
+  }
+
+JSON Backend -> Frontend (GET /salas/<sala_id>/mensajes):
+  [
+    {
+      "id_mensaje": "uuid",
+      "sala_id": "uuid",
+      "usuario_id": "uuid",
+      "contenido": "¡Hola a todos!",
+      "fecha_envio": "2025-01-15T10:30:00",
+      "editado": false
+    }
+  ]
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/SalaDetalle.jsx - Chat de sala
+  - Llamada fetch: api.get('/salas/<sala_id>/mensajes')
+
+================================================================================
+TABLA 15: PASSWORD_RESET_CODE
+================================================================================
+Descripción: Códigos temporales para reset de contraseña.
+
+Campos principales:
+  - id: Integer (PK)
+  - usuario_id: UUID (FK -> usuario.id_usuario)
+  - codigo: String(6), único
+  - creado_en: DateTime
+  - expira_en: DateTime
+  - usado: Boolean
+
+Relaciones:
+  - Usuario (N:1)
+
+Rutas Backend:
+  POST /api/auth/request-password-reset - Solicitar reset (envía email con código)
+  POST /api/auth/verify-reset-code - Verificar código
+  POST /api/auth/reset-password - Establecer nueva contraseña con código
+
+JSON Frontend -> Backend (POST /auth/request-password-reset):
+  {
+    "correo": "usuario@email.com"
+  }
+
+JSON Frontend -> Backend (POST /auth/reset-password):
+  {
+    "correo": "usuario@email.com",
+    "code": "ABCD12",
+    "new_password": "nueva_contraseña_segura"
+  }
+
+Frontend - Ubicación y uso:
+  - frontend/src/pages/Login.jsx - Opción "Olvidé contraseña"
+  - frontend/src/components/PasswordResetModal.jsx
+
+================================================================================
+TABLA 16: ALEMBIC_VERSION
+================================================================================
+Descripción: Control interno de versiones de la BD (gestión de migraciones).
+
+Campos principales:
+  - version_num: String(32) (PK)
+
+Uso interno: Las migraciones se ejecutan automáticamente y se registran aquí.
+No requiere interacción del desarrollador después de setup inicial.
+
+================================================================================
+FLUJOS PRINCIPALES DEL SISTEMA
+================================================================================
+
+FLUJO 1: Registro y Login
+1. Usuario POST /auth/register con (username, correo, password)
+2. Backend hash password, crea registro Usuario, retorna token JWT
+3. Frontend guarda token en localStorage
+4. Frontend redirige a dashboard
+
+FLUJO 2: Crear y Completar Tarea
+1. Usuario POST /tareas con (titulo, descripcion, prioridad, fecha_vencimiento)
+2. Backend crea Tarea, incrementa puntos en Progreso
+3. Frontend muestra en lista de tareas
+4. Usuario PATCH /tareas/<id>/completar
+5. Backend actualiza estado='completada', completada=true, suma puntos
+
+FLUJO 3: Sesión Pomodoro
+1. Usuario GET /tecnicas para listar disponibles
+2. Usuario POST /productividad/pomodoro/iniciar con (tecnica_id, duracion)
+3. Backend crea Sesion con estado='iniciada'
+4. Frontend inicia timer local (25 min por defecto)
+5. Usuario POST /productividad/pomodoro/finalizar
+6. Backend calcula duracion_real, actualiza Progreso, incrementa puntos
+
+FLUJO 4: Meditación
+1. Similar a Pomodoro pero con POST /bienestar/meditacion/...
+2. Backend registra en Sesion con categoria 'meditacion'
+
+FLUJO 5: Crear Sala y Unirse
+1. Usuario POST /salas con (nombre, descripcion, es_privada)
+2. Backend crea Sala, agrega creador en UsuarioSala como 'creador'
+3. Otros usuarios POST /salas/unirse con codigo_acceso (si es privada)
+4. Backend agrega en UsuarioSala como 'participante'
+5. Usuarios en sala ven tareas/sesiones compartidas
+
+FLUJO 6: Ganar y Obtener Recompensas
+1. Usuario accumula puntos a través de tareas, sesiones
+2. Sistema verifica automáticamente requisitos en tabla Recompensa
+3. Usuario POST /recompensas/otorgar con recompensa_id
+4. Backend crea RecompensaUsuario, deduce puntos, actualiza perfil
+
+FLUJO 7: Registrar Estado de Ánimo
+1. Usuario POST /estado-animo con (valor 1-5, nota)
+2. Backend crea EstadoAnimo
+3. Frontend GET /estado-animo/historial?days=14 para gráfico
+4. Backend agrupa por día y calcula promedio
+
+================================================================================
+CONSUMO DE JSON - RESUMEN TÉCNICO
+================================================================================
+
+Frontend -> Backend (Headers requeridos):
+  - Content-Type: application/json
+  - Authorization: Bearer <jwt_token> (en todos excepto auth)
+
+Convenciones:
+  - UUIDs en formato string "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  - Fechas en ISO 8601: "2025-01-15T10:30:00" o "2025-01-15"
+  - Booleanos: true/false (minúsculas)
+  - Estados predefinidos: usar strings exactos ('pendiente', 'completada', etc)
+
+Errores Backend (formato estándar):
+  {
+    "error": "Descripción del error",
+    "code": 400/401/403/404/500
+  }
+
+Token JWT:
+  - Duración típica: 24 horas
+  - Incluye: user_id, rol
+  - Se envía en header: Authorization: Bearer <token>
+  - Se valida con: @jwt_required() en backend
+
+================================================================================
+NOTAS DE IMPLEMENTACIÓN
+================================================================================
+
+1. Base de datos MySQL con charset utf8mb4 para soporte completo Unicode
+
+2. Todas las queries de GET con JWT validan que el usuario actual sea el propietario
+   (excepto admin que puede ver todo)
+
+3. Las fechas se almacenan en UTC en BD, frontend convierte a zona local
+
+4. Los UUIDs se generan con Python uuid.uuid4()
+
+5. Las contraseñas se hashean con werkzeug.security.generate_password_hash
+
+6. Los puntos se calculan automáticamente según tipo de sesión/tarea
+
+7. Las migraciones de BD se manejan con Flask-Migrate/Alembic
+
+8. El JWT expira después de 24 horas, requiere re-login
+
+9. Las salas privadas usan código de 6 caracteres para acceso
+
+10. Los datos sensibles (contraseñas, tokens) nunca se envían en GET/URL
+
+================================================================================
+FIN DE DOCUMENTACION
+================================================================================

@@ -1,0 +1,17 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import ScrollToTop from './components/ScrollToTop';
+import './styles.css';
+import ErrorBoundary from './ErrorBoundary';
+import './i18n'; 
+
+createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <ScrollToTop />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  </BrowserRouter>
+);

@@ -1,0 +1,14 @@
+:root{ --bg:#f7f7fb; --text:#111827; --muted:#6b7280; --accent:#7c3aed }
+body{ margin:0; font-family:Inter, Arial, sans-serif; background:var(--bg); color:var(--text) }
+.nav{ display:flex; align-items:center; justify-content:space-between; padding:12px 20px; background:linear-gradient(90deg,#fff,#f3f3f6); border-bottom:1px solid #e6e6ef }
+.brand{ margin:0 }
+.nav-right{ display:flex; gap:8px; align-items:center }
+.btn{ padding:8px 12px; border-radius:8px; border:1px solid transparent; background:transparent; cursor:pointer }
+.btn-login{ background:var(--accent); color:white }
+.btn-register{ background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.06) }
+.app-main{ padding:24px }
+.page{ max-width:880px; margin:24px auto; background:white; padding:18px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.04) }
+.page-auth label{ display:block; margin-bottom:10px }
+.page-auth input{ display:block; width:100%; padding:8px 10px; border-radius:6px; border:1px solid #e6e6ef }
+.actions{ display:flex; gap:8px; align-items:center; margin-top:12px }
+.error{ color:#b91c1c; margin-bottom:12px }

@@ -1,0 +1,612 @@
+.profile-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.profile-tab-button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+  color: #0f172a;
+}
+.profile-tab-button.active {
+  background: linear-gradient(135deg, #7c3aed 0%, #667eea 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.12);
+}
+
+.hover-card { background: #ffffff; border: 1px solid transparent; transition: border-color .18s ease, box-shadow .18s ease; }
+
+/* Hover: igualar borde/sombra a las tarjetas de estadísticas */
+.hover-card:hover {
+  /* Quitar borde/sombra púrpura: usar un acento neutro para el hover */
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.06);
+}
+.profile-header { padding: 22px; }
+
+.settings-section { display: block; }
+.settings-group { display: flex; flex-direction: column; gap: 12px; }
+.settings-option { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
+.modal-backdrop { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; background: transparent; z-index: 2000; }
+.confirmation-modal { width: 100%; max-width: 720px; background: #fff; padding: 18px; border-radius: 12px; box-shadow: 0 8px 20px rgba(2,6,23,0.06); }
+.modal-actions { display:flex; gap: 8px; justify-content:flex-end; margin-top: 12px; }
+.cancel-button { background: #f3f4f6; border: 1px solid #e6e9ef; padding: 8px 12px; border-radius: 8px; cursor:pointer; }
+.confirm-button { background: linear-gradient(135deg, #7c3aed, #667eea); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor:pointer; font-weight:700; }
+.danger-button { background: linear-gradient(90deg,#ef4444,#f97316); color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+.action-button.primary-button { background: linear-gradient(135deg, #7c3aed 0%, #667eea 100%); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; }
+
+.password-field { position: relative; display:flex; align-items:center; }
+.form-input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ef; }
+.pw-toggle { position: absolute; right: 8px; top: 35%; transform: translateY(-50%); background: transparent; border:none; cursor:pointer; }
+.pw-toggle:hover,
+.pw-toggle:focus,
+.pw-toggle:active {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.profile-info { display:block; }
+.profile-header .edit-button { background: rgba(255,255,255,0.12); }
+
+.stats-root { padding: 12px 0; }
+.stats-title { font-size: 18px; margin-bottom: 12px; }
+.stats-cards { display:flex; gap:12px; flex-wrap:wrap; }
+.stat-card { flex:1 1 150px; background: #f8fafc; padding: 14px; border-radius: 12px; display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+.stat-icon { font-size:18px; }
+.stat-value { font-size:20px; font-weight:800; }
+.stat-label { font-size:12px; color:#6b7280; }
+
+.level-bar { height: 10px; background: #eef2ff; border-radius: 999px; overflow:hidden; }
+.level-fill { height: 100%; background: linear-gradient(90deg,#7c3aed,#667eea); }
+
+.achievements-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap:10px; }
+.achievement-card { padding: 10px; border-radius: 10px; background: #f8fafc; border:1px solid #e6e9ef; }
+.achievement-card.unlocked { box-shadow: 0 6px 18px rgba(2,6,23,0.06); border-color: rgba(0,0,0,0.06); }
+.no-achievements { color: #6b7280; }
+
+@media (max-width: 900px) {
+  .profile-tabs { flex-wrap: wrap; }
+  .stats-cards { flex-direction: column; }
+}
+/* Estilos para la sección de configuración */
+.settings-section {
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.settings-group {
+  margin-bottom: 32px;
+}
+
+.settings-group h3 {
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+}
+
+.settings-option {
+  margin-bottom: 16px;
+}
+
+.danger-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.danger-button:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Modal de confirmación */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirmation-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.confirmation-modal h3 {
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.confirmation-modal p {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.confirmation-modal input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  border: 1px solid #d9d9d9;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancel-button:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.confirm-button {
+  padding: 10px 20px;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.confirm-button:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.confirm-button.danger {
+  background: #ff4d4f;
+}
+
+.error-message {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 12px;
+  border-radius: 8px;
+  color: #ff4d4f;
+  margin-bottom: 16px;
+}/* Styles for Profile statistics view */
+.stats-root{
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: var(--shadow-light);
+}
+.stats-title{
+  margin: 0 0 18px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stats-cards{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.stat-card{
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Hover effect to match achievements visual: subtle border + shadow + lift */
+.stat-card,
+.achievement-card,
+.card {
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 160ms ease;
+}
+.stat-card:hover,
+.achievement-card:hover,
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 50px rgba(2,6,23,0.06);
+  border-color: rgba(0,0,0,0.06);
+}
+
+.stat-icon{
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+
+.stat-value{
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.stat-label{
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.stats-row{
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+  margin-bottom: 18px;
+}
+
+.card{
+  background: var(--bg-primary);
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.03);
+  overflow: hidden;
+}
+.card-header{
+  padding: 14px 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+.card-body{
+  padding: 14px 16px;
+  color: var(--text-primary);
+}
+.large-card .card-body{ padding: 18px 20px; }
+
+.level-info{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.level-label{ font-weight:700; font-size:16px; }
+.level-xp{ font-size:13px; color:var(--text-tertiary); }
+.level-bar{
+  background: rgba(0,0,0,0.05);
+  height: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.level-fill{
+  height:100%;
+  background: linear-gradient(90deg,#a78bfa,#f472b6);
+}
+.level-footer{ font-size:12px; color:var(--text-tertiary); margin-top:10px; }
+
+.activity-list{ display:flex; flex-direction:column; gap:8px; }
+.activity-item{ display:flex; justify-content:space-between; color:var(--text-primary); font-weight:600 }
+
+.achievements-card{ margin-top:8px; }
+.achievements-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+.achievement-card{
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 12px;
+  /* Make the surrounding border very light / near-white to match the level progress visuals */
+  border: 1px solid rgba(255,255,255,0.06);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-height:72px;
+  color: var(--text-tertiary);
+}
+.achievement-card.unlocked{
+  background: linear-gradient(180deg, rgba(250,250,250,0.9), rgba(250,250,250,0.95));
+  color: var(--text-primary);
+  border-color: rgba(0,0,0,0.04);
+}
+.achievement-icon{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(167,139,250,0.12); font-size:18px }
+.achievement-title{ font-weight:700; font-size:14px }
+.achievement-desc{ font-size:12px; color:var(--text-tertiary) }
+
+.no-achievements{ padding:20px; color:var(--text-tertiary) }
+
+/* Responsive */
+@media (max-width: 900px){
+  .stats-cards{ grid-template-columns: repeat(2,1fr); }
+  .stats-row{ grid-template-columns: 1fr; }
+  .achievements-grid{ grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 520px){
+  .stats-cards{ grid-template-columns: 1fr; }
+  .achievements-grid{ grid-template-columns: 1fr; }
+}
+
+/* Make Información and Configuración cards match Estadísticas visual style */
+.hover-card, .settings-section {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid rgba(0,0,0,0.03);
+  transition: transform 180ms ease, box-shadow 220ms ease, border-color 160ms ease;
+}
+.hover-card:hover, .settings-section:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 50px rgba(167,139,250,0.10);
+  border-color: rgba(167,139,250,0.18);
+}
+
+/* Midnight theme variant */
+[data-theme="midnight"] .hover-card,
+[data-theme="midnight"] .settings-section {
+  background: var(--bg-primary);
+  /* evitar línea morada: usar borde neutro en midnight */
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+}
+
+/* Support class-based theme names too (some apps use body classes) */
+.theme-midnight .hover-card,
+[data-theme="midnight"] .hover-card,
+.theme-midnight .settings-section,
+[data-theme="midnight"] .settings-section {
+  background: var(--bg-primary);
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+}
+
+/* Make the modal visually match each theme */
+.confirmation-modal { background: #ffffff; color: #111827; }
+.confirmation-modal input { background: var(--bg-secondary); color: var(--text-primary); }
+
+.theme-midnight .confirmation-modal,
+[data-theme="midnight"] .confirmation-modal {
+  background: var(--bg-primary);
+  color: #e6eef8;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.7);
+}
+
+.theme-midnight .confirmation-modal input,
+[data-theme="midnight"] .confirmation-modal input {
+  background: rgba(255,255,255,0.02);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+/* Make headings and paragraphs inside modal clearly white in dark/midnight themes */
+[data-theme="midnight"] .confirmation-modal h3,
+[data-theme="midnight"] .confirmation-modal p {
+  color: #ffffff;
+}
+
+/* Also support class-based dark theme selectors */
+.theme-midnight .confirmation-modal,
+[data-theme="midnight"] .confirmation-modal {
+  background: var(--bg-primary);
+  color: #e6eef8;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.7);
+  /* evitar borde púrpura en modal */
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.theme-midnight .confirmation-modal h3,
+[data-theme="midnight"] .confirmation-modal h3 {
+  color: #ffffff;
+}
+
+.theme-midnight .confirmation-modal p,
+[data-theme="midnight"] .confirmation-modal p {
+  color: rgba(230,238,248,0.9);
+}
+
+/* Ensure modal border is visible in midnight/dark and buttons contrast */
+[data-theme="midnight"] .confirmation-modal,
+.theme-midnight .confirmation-modal {
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+[data-theme="midnight"] .confirm-button,
+.theme-midnight .confirm-button {
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-theme="midnight"] .cancel-button,
+.theme-midnight .cancel-button {
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  color: #ffffff;
+}
+
+/* When modal is open, avoid transforms/transitions in background elements that can cause jitter */
+body.modal-open .hover-card,
+body.modal-open .card,
+body.modal-open .stat-card,
+body.modal-open .achievement-card,
+body.modal-open .stats-root,
+body.modal-open .profile-info,
+body.modal-open .profile-tabs {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Make backdrop capture all pointer events and keep modal static */
+.modal-backdrop { pointer-events: auto; }
+.modal-backdrop * { pointer-events: auto; }
+
+
+/* Modal: center fixed and stable (avoid movement when hovering elsewhere) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: block;
+  /* Por defecto no oscurecer el fondo: mantener transparente para que el modal
+     no 'grisee' la página detrás. Para temas oscuros aplicamos la superposición más abajo. */
+  background: transparent;
+  z-index: 1200;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.confirmation-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  width: calc(100% - 48px);
+  max-width: 720px;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+  background: #ffffff;
+  color: #111827;
+  z-index: 1210;
+}
+
+.confirmation-modal * {
+  transition: none !important; /* avoid hover-induced layout transitions inside modal */
+}
+
+.confirmation-modal input {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Midnight theme for modal */
+[data-theme="midnight"] .modal-backdrop {
+  background: rgba(2,6,23,0.6);
+}
+
+/* También soportar selectores basados en clases para temas oscuros */
+.theme-midnight .modal-backdrop,
+[data-theme="midnight"] .modal-backdrop {
+  background: rgba(2,6,23,0.6);
+}
+
+[data-theme="midnight"] .confirmation-modal {
+  background: var(--bg-primary);
+  color: #e6eef8;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.7);
+}
+
+[data-theme="midnight"] .confirmation-modal input {
+  background: rgba(255,255,255,0.02);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+[data-theme="midnight"] .confirm-button,
+[data-theme="midnight"] .cancel-button {
+  box-shadow: none;
+}
+
+/* Additional midnight adjustments: tabs, stat and achievement cards, settings text */
+[data-theme="midnight"] .profile-tab-button {
+  color: #ffffff;
+  background: transparent;
+  border-color: transparent;
+}
+[data-theme="midnight"] .profile-tab-button.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed 0%, #667eea 100%);
+  box-shadow: 0 6px 18px rgba(99,102,241,0.12);
+}
+
+[data-theme="midnight"] .settings-section {
+  background: var(--bg-primary);
+  color: #e6eef8;
+}
+
+[data-theme="midnight"] .settings-section h3,
+[data-theme="midnight"] .card-header,
+[data-theme="midnight"] .stats-title {
+  color: #ffffff;
+}
+
+[data-theme="midnight"] .stat-card {
+  background: var(--bg-secondary);
+  border-color: rgba(255,255,255,0.04);
+}
+
+[data-theme="midnight"] .achievement-card {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.03);
+  color: #d7e3fb;
+}
+
+[data-theme="midnight"] .achievement-card.unlocked {
+  /* evitar acentos púrpuras: usar fondo neutro en unlocked */
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  color: var(--text-primary);
+  border-color: rgba(0,0,0,0.06);
+}
+
+[data-theme="midnight"] .level-bar { background: rgba(255,255,255,0.04); }
+[data-theme="midnight"] .level-fill { background: linear-gradient(90deg,#7c3aed,#667eea); }
+
+[data-theme="midnight"] .profile-tab-button { font-weight: 700; }
+
+/* ================================
+   Override global: remover líneas/párrafos púrpuras
+   Estas reglas neutralizan bordes, outlines y sombras púrpuras en selecciones
+   frecuentes para cumplir con la petición: "no mostrar la línea morada".
+   Se usan !important solo para asegurar que sobrescriban reglas más específicas
+   ya presentes en otros ficheros de estilos.
+   ================================ */
+.hover-card:hover,
+.stat-card:hover,
+.achievement-card.unlocked,
+.achievement-card,
+.card:hover,
+.activity-item.clickable:focus,
+.action-card-btn.purple,
+.achievement-icon,
+.confirmation-modal,
+.confirm-button,
+.cancel-button,
+.level-fill {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* También remover outlines aplicados por focus/outline en inputs y botones */
+:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}

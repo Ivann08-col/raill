@@ -1,0 +1,473 @@
+.tecnicas-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 1400;
+}
+
+.tecnicas-modal {
+  width: 92%;
+  max-width: 880px;
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #111827);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.2);
+  position: relative;
+}
+
+.tecnicas-modal-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-tertiary, #6b7280);
+}
+
+.tecnicas-modal-close:hover {
+  transform: rotate(90deg);
+  background: rgba(0,0,0,0.04);
+  color: var(--text-primary);
+}
+
+.tecnicas-modal-title {
+  margin: 0 0 12px 0;
+  font-size: 1.25rem;
+}
+
+.tecnicas-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.tecnicas-modal-desc {
+  color: var(--text-tertiary, #6b7280);
+}
+
+/* Make modal grid responsive when used from JSX */
+@media (max-width: 760px) {
+  .tecnicas-modal-grid { grid-template-columns: 1fr; }
+}
+
+/* Selector modal cards */
+.tecnicas-select-card {
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 2px solid var(--border-default, #e5e7eb);
+  background: linear-gradient(135deg, var(--bg-primary, #f9fafb) 0%, var(--bg-primary, #ffffff) 100%);
+}
+.tecnicas-select-card:hover { transform: translateY(-8px); box-shadow: 0 12px 40px rgba(2,6,23,0.08); }
+.tecnicas-select-icon { width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; color:white; }
+.select-blue { background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); }
+.select-pink { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); }
+.tecnicas-select-title { margin:0; font-size:1.5rem; font-weight:800; color:var(--text-primary); }
+.tecnicas-select-desc { margin:0; color:var(--text-tertiary); font-size:0.95rem; line-height:1.6 }
+.tecnicas-select-btn { margin-top:auto; border-radius:12px; padding:14px 24px; font-weight:700; cursor:pointer; border:none; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; }
+
+/* Pomodoro-specific: use CSS variables so colors adapt to theme (light / midnight) */
+.tecnicas-select-card.select-pomodoro .tecnicas-select-icon {
+  /* icon background should be a soft bg and icon color a contrasting tone */
+  background: var(--tech-pomodoro-bg, #dbeafe);
+  color: var(--tech-pomodoro-text, #1e40af);
+}
+.tecnicas-select-card.select-pomodoro .tecnicas-select-title {
+  color: var(--tech-pomodoro-text, #1e40af);
+}
+.tecnicas-select-card.select-pomodoro .tecnicas-select-desc {
+  color: color-mix(in srgb, var(--tech-pomodoro-text, #1e40af) 60%, var(--text-tertiary, #6b7280));
+}
+.tecnicas-select-card.select-pomodoro .tecnicas-select-btn {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tech-pomodoro-text, #1e40af) 50%, transparent), var(--tech-pomodoro-text, #1e40af));
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--tech-pomodoro-text, #1e40af) 24%, transparent);
+}
+
+/* Midnight overrides for selector modal */
+[data-theme="midnight"] .tecnicas-modal-backdrop { background: rgba(2,6,23,0.6); }
+[data-theme="midnight"] .tecnicas-select-card {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6), inset 0 0 0 1px rgba(124,58,237,0.03);
+}
+[data-theme="midnight"] .tecnicas-select-card:hover { box-shadow: 0 18px 56px rgba(2,6,23,0.7), inset 0 0 0 1px rgba(124,58,237,0.04); }
+[data-theme="midnight"] .tecnicas-select-title { color: var(--text-primary); }
+[data-theme="midnight"] .tecnicas-select-desc { color: rgba(255,255,255,0.78); }
+[data-theme="midnight"] .tecnicas-select-btn { background: linear-gradient(90deg,#7c3aed,#6d28d9); box-shadow: 0 8px 24px rgba(109,40,217,0.25); }
+
+/* Force-dark fallback inside modal to avoid white cards when theme is midnight (important rules) */
+.tecnicas-modal[data-theme="midnight"] .tecnicas-select-card,
+.tecnicas-modal-backdrop[data-theme="midnight"] .tecnicas-select-card {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.72) !important;
+}
+
+/* Ensure inner text/icons keep readable contrast */
+.tecnicas-modal[data-theme="midnight"] .tecnicas-select-card *,
+.tecnicas-modal-backdrop[data-theme="midnight"] .tecnicas-select-card * {
+  color: inherit !important;
+}
+
+/* Make the select button a darker accent in midnight to avoid white appearance */
+.tecnicas-modal[data-theme="midnight"] .tecnicas-select-card .tecnicas-select-btn {
+  background: linear-gradient(90deg, rgba(124,58,237,0.16), rgba(124,58,237,0.26));
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(124,58,237,0.12) !important;
+}
+
+/* Prevent cards from flashing to white on :active / :focus in midnight; keep accent via border/glow instead */
+.tecnicas-select-card:active,
+.tecnicas-select-card:focus,
+.tecnicas-select-card.selected {
+  background: inherit !important;
+  color: inherit !important;
+  outline: none;
+  box-shadow: 0 20px 60px rgba(2,6,23,0.75);
+  transform: translateY(-6px);
+}
+
+/* For light theme, selected still shows accent but we avoid full white fill in midnight */
+.tecnicas-select-card.selected .tecnicas-select-icon { transform: translateY(-2px); }
+
+/* Midnight: modal should use theme vars (no white backgrounds). Descriptive text must be readable (white-ish).
+  .tecnicas-modal already uses var(--bg-primary) so we only adjust desc color here if needed */
+[data-theme="midnight"] .tecnicas-modal-desc { color: rgba(255,255,255,0.88); }
+
+.tecnicas-card {
+  background: var(--bg-secondary, #f8fafc);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tecnicas-card-desc { color: var(--text-tertiary); margin: 0; }
+
+.tecnicas-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.04);
+}
+
+.tecnicas-select-btn {
+  background: linear-gradient(90deg,#7c3aed,#6d28d9);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-open-selector {
+  background: linear-gradient(90deg,#7c3aed,#6d28d9);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .tecnicas-modal-grid { grid-template-columns: 1fr; }
+}
+
+/* Page-level styles for the Técnicas view (light default) */
+.tecnicas-page {
+  min-height: 100vh;
+  padding: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #0f172a;
+}
+
+.tecnicas-page .content-wrapper { max-width: 1200px; margin: 0 auto; }
+.tecnicas-page section { margin-top: 24px; }
+.tecnicas-page article { transition: box-shadow 0.25s ease, transform 0.25s ease; }
+.tecnicas-page article:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(2,6,23,0.12); }
+.tecnicas-page .details-box { margin-top: 14px; padding: 12px; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%); border-radius: 10px; color: #0f172a; }
+
+/* Header and info card styles - use theme variables so midnight renders correctly */
+.tecnicas-header {
+  background: var(--bg-secondary);
+  border-radius: 24px;
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-default);
+}
+.tecnicas-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.tecnicas-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.tecnicas-header .icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
+}
+.tecnicas-header .title {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  /* gradient title in light mode only */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tecnicas-header .subtitle {
+  margin: 6px 0 0;
+  color: var(--text-tertiary);
+}
+.explore-btn {
+  background: linear-gradient(90deg,#7c3aed,#6d28d9);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.explore-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(102, 126, 234, 0.12); }
+.info-card {
+  margin-top: 16px;
+  background: var(--bg-primary);
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border-default);
+}
+.info-title { margin: 0 0 8px; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.info-desc { margin: 0; color: var(--text-tertiary); font-size: 0.95rem; line-height: 1.6; }
+
+/* Midnight theme overrides for Técnicas */
+[data-theme="midnight"] .tecnicas-page { background: var(--bg-primary); color: var(--text-primary); }
+[data-theme="midnight"] .tecnicas-page .details-box { background: rgba(255,255,255,0.02); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.08); }
+[data-theme="midnight"] .tecnicas-page article { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 10px 40px rgba(2,6,23,0.65); }
+[data-theme="midnight"] .tecnicas-page article:hover { transform: translateY(-6px); box-shadow: 0 18px 56px rgba(2,6,23,0.72); }
+
+/* Make card icons/backgrounds slightly more contrasted and borders more visible */
+[data-theme="midnight"] .tecnicas-card {
+  /* Match HomePageLogueado card appearance in midnight: use shared bg, stronger border and shadow */
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 36px rgba(2,6,23,0.58);
+}
+
+[data-theme="midnight"] .tecnicas-card-icon {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+}
+
+[data-theme="midnight"] .tecnicas-card-desc { color: rgba(255,255,255,0.86); }
+
+/* Additional midnight tweaks to ensure the "Detalles" pills match dark theme */
+[data-theme="midnight"] .tecnicas-page .details-box {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+}
+
+[data-theme="midnight"] .tecnicas-page .details .details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+[data-theme="midnight"] .tecnicas-page .detail-pill {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-weight: 800;
+}
+
+[data-theme="midnight"] .tecnicas-page .detail-pill .muted { color: rgba(229,231,235,0.7); }
+
+/* Preserve the colored accent bar on top of each pill to communicate meaning */
+[data-theme="midnight"] .tecnicas-page .detail-work { border-top: 4px solid #a78bfa; }
+[data-theme="midnight"] .tecnicas-page .detail-short { border-top: 4px solid #10b981; }
+[data-theme="midnight"] .tecnicas-page .detail-long { border-top: 4px solid #60a5fa; }
+[data-theme="midnight"] .tecnicas-page .detail-cycles { border-top: 4px solid #fb923c; }
+
+/* Modal technique cards in midnight: darker cards, readable text and badges */
+[data-theme="midnight"] .technique-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-primary);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+}
+
+[data-theme="midnight"] .tech-icon { opacity: 0.98; }
+[data-theme="midnight"] .tech-description, [data-theme="midnight"] .tech-benefits li, [data-theme="midnight"] .time-value, [data-theme="midnight"] .time-label {
+  color: rgba(229,231,235,0.92);
+}
+
+[data-theme="midnight"] .tech-times .pill {
+  /* Darker pill: almost the same tone as the card but slightly lighter so white text
+     stands out. Use low-opacity white to create a soft contrast on dark card. */
+  background: rgba(255,255,255,0.02) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.35);
+  font-weight: 900;
+  font-size: 1.05rem;
+  padding: 12px 14px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  text-align: center;
+  transition: background 180ms ease, transform 160ms ease, box-shadow 180ms ease;
+}
+
+/* Slightly dim disabled or unavailable pills while keeping number readable */
+[data-theme="midnight"] .tech-times .pill.disabled,
+[data-theme="midnight"] .tech-times .pill[aria-disabled="true"] {
+  background: rgba(255,255,255,0.01) !important;
+  color: rgba(255,255,255,0.60) !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+  box-shadow: none !important;
+}
+
+/* Ensure the numeric value and label inside the pill are bright and bold */
+[data-theme="midnight"] .tech-times .pill .time-value,
+[data-theme="midnight"] .tech-times .pill .time-label,
+[data-theme="midnight"] .tech-times .pill span {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+}
+
+[data-theme="midnight"] .badge { background: rgba(255,255,255,0.03); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.03); }
+
+/* Improve contrast of the selector/close buttons in midnight */
+[data-theme="midnight"] .close-btn { background: rgba(255,255,255,0.04); color: #e5e7eb; }
+[data-theme="midnight"] .select-btn { background: rgba(255,255,255,0.06); color: #e5e7eb; border: 1px solid rgba(255,255,255,0.06); }
+
+/* Strong Pomodoro-specific rules for midnight: dark card, light icon/text/button */
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro {
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.008));
+  border: 1px solid rgba(124,58,237,0.10);
+  box-shadow: 0 14px 48px rgba(2,6,23,0.68);
+}
+
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro .tecnicas-select-icon {
+  background: var(--tech-pomodoro-bg) !important; /* soft indigo translucent */
+  color: var(--tech-pomodoro-text) !important;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.12) inset, 0 6px 20px rgba(0,0,0,0.45);
+}
+
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro .tecnicas-select-icon svg,
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro .tecnicas-select-icon > * {
+  color: var(--tech-pomodoro-text) !important;
+  fill: var(--tech-pomodoro-text) !important;
+  stroke: var(--tech-pomodoro-text) !important;
+}
+
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro .tecnicas-select-title {
+  color: #FFFFFF !important;
+}
+
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro .tecnicas-select-desc {
+  color: rgba(255,255,255,0.86) !important;
+}
+
+[data-theme="midnight"] .tecnicas-select-card.select-pomodoro .tecnicas-select-btn {
+  background: linear-gradient(90deg, rgba(124,58,237,0.16), rgba(124,58,237,0.28)) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(124,58,237,0.12) !important;
+  box-shadow: 0 8px 22px rgba(109,40,217,0.18) !important;
+}
+
+/* Prevent cards from flashing white on focus/active; prefer border/glow accent */
+[data-theme="midnight"] .tecnicas-select-card:focus,
+[data-theme="midnight"] .tecnicas-select-card:active,
+[data-theme="midnight"] .tecnicas-select-card.selected {
+  background: linear-gradient(180deg, rgba(255,255,255,0.014), rgba(255,255,255,0.008)) !important;
+  color: #FFFFFF !important;
+  outline: none !important;
+  box-shadow: 0 22px 64px rgba(2,6,23,0.78), 0 0 0 4px rgba(124,58,237,0.06) !important;
+  transform: translateY(-6px) !important;
+}
+
+/* Make inner buttons and small text elements inherit light color */
+[data-theme="midnight"] .tecnicas-select-card * {
+  color: inherit !important;
+}
+
+/* Add subtle transition for color/background to reduce perceived flashing */
+.tecnicas-select-card,
+.tecnicas-select-icon,
+.tecnicas-select-btn {
+  transition: background 220ms ease, color 200ms ease, box-shadow 220ms ease, transform 180ms ease;
+}
+
+/* Small screens: reduce grid columns to avoid cramped pills */
+@media (max-width: 1024px) { [data-theme="midnight"] .tecnicas-page .details .details-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 640px) { [data-theme="midnight"] .tecnicas-page .details .details-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 768px) {
+  .tecnicas-page { padding: 16px; }
+  .tecnicas-page section { gap: 16px; }
+}
+
+/* Extra safety: garantizar que las tarjetas del modal de selección POMODORO
+   sean oscuras únicamente cuando el theme global sea midnight. Estas reglas
+   tienen alta especificidad y usan !important para sobrescribir reglas
+   de librerías/inline que puedan forzar blanco en algunas plataformas. */
+[data-theme="midnight"] .tecnicas-modal .tecnicas-select-card.select-pomodoro,
+[data-theme="midnight"] .tecnicas-modal-backdrop .tecnicas-select-card.select-pomodoro,
+.tecnicas-modal[data-theme="midnight"] .tecnicas-select-card.select-pomodoro,
+.tecnicas-modal-backdrop[data-theme="midnight"] .tecnicas-select-card.select-pomodoro {
+  background: var(--bg-secondary) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  box-shadow: 0 14px 48px rgba(2,6,23,0.72) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Asegurar que los textos internos (titulo/desc/botón) mantengan contraste
+   en midnight, pero no afectar a temas distintos (no hay regla fuera de midnight). */
+[data-theme="midnight"] .tecnicas-modal .tecnicas-select-card.select-pomodoro * {
+  color: inherit !important;
+}

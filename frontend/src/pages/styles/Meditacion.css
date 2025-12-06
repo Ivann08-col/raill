@@ -1,0 +1,202 @@
+/* Meditacion - reglas extraídas de frontend/src/styles.css
+   Archivo autogenerado: contiene únicamente los estilos usados por la página
+   `Meditacion.jsx`.
+
+   Nota: Estas reglas usan variables CSS (por ejemplo --bg-primary, --primary-purple-dark, --input-bg, etc.).
+   Asegúrate de que el proyecto donde vayas a pegar este archivo tenga esas variables definidas en :root
+   (puedes copiar el bloque :root desde `frontend/src/styles.css`) o reemplaza las variables por colores concretos.
+*/
+
+/* ==================== */
+/* Meditacion Premium Styles */
+/* ==================== */
+.meditacion-app {
+    min-height: 100vh;
+    padding: 32px;
+    background: var(--bg-primary);
+    transition: background 0.3s;
+}
+
+@media (max-width: 600px) {
+    .meditacion-app { padding: 16px; }
+}
+
+.meditacion-app .container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.meditacion-app .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+}
+.meditacion-app .stat-card {
+    background: var(--card-bg, var(--bg-secondary));
+    color: var(--text-primary);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-align: center;
+    transition: background 0.3s, color 0.3s;
+}
+.meditacion-app .stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    color: #fff;
+}
+.meditacion-app .stat-icon.purple { background: var(--primary-purple-dark); }
+.meditacion-app .stat-icon.pink { background: var(--primary-pink, #ec4899); }
+.meditacion-app .stat-icon.blue { background: var(--primary-blue, #3b82f6); }
+.meditacion-app .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 8px 0;
+}
+.meditacion-app .stat-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.meditacion-app .tabs-container {
+    background: var(--card-bg, var(--bg-secondary));
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: background 0.3s, color 0.3s;
+}
+.meditacion-app .tabs-header {
+    display: flex;
+    border-bottom: 2px solid var(--border-default);
+    margin-bottom: 24px;
+}
+.meditacion-app .tab-button {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    margin-bottom: -2px;
+    border-bottom: 2.5px solid transparent;
+}
+.meditacion-app .tab-button:hover {
+    color: var(--primary-purple-dark);
+    background: var(--bg-tertiary);
+}
+.meditacion-app .tab-button.active {
+    color: var(--primary-purple-dark);
+    border-bottom: 2.5px solid var(--primary-purple-dark);
+    background: transparent;
+}
+.meditacion-app .tabs-content {
+    padding: 20px 0;
+}
+.meditacion-app .session-active {
+    text-align: center;
+}
+.meditacion-app .session-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+.meditacion-app .session-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+.meditacion-app .timer-circle {
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 24px auto;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-default);
+    transition: all 0.3s;
+}
+.meditacion-app .timer-time {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.meditacion-app .timer-label {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+.meditacion-app .session-controls {
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+.meditacion-app .control-select, .meditacion-app .duration-slider {
+    width: 100%;
+    max-width: 320px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: background 0.3s, color 0.3s, border 0.3s;
+}
+.meditacion-app .control-select:focus {
+    border: 1.5px solid var(--input-focus-border);
+    background: var(--input-focus-bg);
+    color: var(--text-primary);
+}
+.meditacion-app .control-select option {
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+.meditacion-app .duration-slider {
+    -webkit-appearance: none;
+    height: 6px;
+    background: var(--border-light);
+    border-radius: 3px;
+}
+.meditacion-app .duration-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-purple-dark);
+    cursor: pointer;
+}
+.meditacion-app .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+.meditacion-app .chart-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    text-align: center;
+}
+.meditacion-app .stat-card, .meditacion-app .tabs-container {
+    box-shadow: 0 2px 16px #0001;
+}
+@media (max-width: 600px) {
+    .meditacion-app .timer-circle { width: 220px; height: 220px; }
+    .meditacion-app .timer-time { font-size: 44px; }
+    .meditacion-app .stats-grid { grid-template-columns: 1fr; }
+    .meditacion-app .session-controls { max-width: 100%; }
+}

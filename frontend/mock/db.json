@@ -1,0 +1,11 @@
+{
+  "tareas": [
+    { "id": 1, "titulo": "Tarea de ejemplo", "descripcion": "Ejemplo de tarea mock", "completada": false }
+  ],
+  "recompensas": [
+    { "id": 1, "nombre": "Café", "descripcion": "Recompensa de ejemplo" }
+  ],
+  "usuarios": [
+    { "id": 1, "nombre": "Usuario Mock", "email": "mock@example.com" }
+  ]
+}

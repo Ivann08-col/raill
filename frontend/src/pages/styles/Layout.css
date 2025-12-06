@@ -1,0 +1,27 @@
+/* Layout.css */
+.app-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.app-content {
+  flex: 1;
+  margin-left: var(--sidebar-width, 64px);
+  transition: margin-left 0.3s ease;
+  padding: 24px;
+  min-height: 100vh;
+  width: calc(100% - var(--sidebar-width, 64px));
+}
+
+@media screen and (max-width: 900px) {
+  .app-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+.main-container {
+  min-height: 100vh;
+  padding: 24px 0;
+}

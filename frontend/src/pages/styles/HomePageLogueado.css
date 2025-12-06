@@ -1,0 +1,1170 @@
+/* Reset y Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Fondo degradado global (morado -> azul/morado oscuro). Esto crea el fondo detrás
+     de las tarjetas blancas centradas del dashboard. */
+  background: linear-gradient(135deg, #7C3AED 0%, #5B21A8 50%, #0F172A 100%);
+  background-attachment: fixed;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh; /* asegurar que el fondo cubra toda la pantalla */
+}
+
+/* El contenedor interno (el "cuadro" central) se identifica con la clase generada
+   "max-w-[1400px]" en el JSX. Forzamos que este hijo sea un cuadro blanco que flote
+   sobre el fondo degradado. */
+.dashboard-container[data-theme="light"] > .max-w-\[1400px\] {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+/* En el modo claro, aseguramos que las tarjetas principales sean blancas y tengan
+   esquinas redondeadas y sombra sutil para 'flotar' sobre el fondo degradado. */
+.dashboard-container[data-theme="light"] .card,
+.dashboard-container[data-theme="light"] .chart-card,
+.dashboard-container[data-theme="light"] .stat-card,
+.dashboard-container[data-theme="light"] .habits-card,
+.dashboard-container[data-theme="light"] .habit-card,
+.dashboard-container[data-theme="light"] .action-card,
+.dashboard-container[data-theme="light"] .activity-card,
+.dashboard-container[data-theme="light"] .timer-card,
+.dashboard-container[data-theme="light"] .center-card,
+.dashboard-container[data-theme="light"] .benefits.card.small,
+.dashboard-container[data-theme="light"] .detail-pill,
+.dashboard-container[data-theme="light"] .counter-box,
+.dashboard-container[data-theme="light"] .recent-item {
+  background: #ffffff;
+  color: #111827;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+/* Fix: asegurar que las chart-card conserven el fondo de midnight
+   incluso si otras reglas (o el remount del componente) aplican
+   estilos por defecto. Usamos selector sobre `:root` para garantizar
+   que el tema global se respete al navegar entre vistas. */
+:root[data-theme="midnight"] .dashboard-container .chart-card,
+:root[data-theme="midnight"] .dashboard-container .chart-card .area-chart,
+:root[data-theme="midnight"] .dashboard-container .chart-card .pie-chart-container {
+  background: var(--bg-secondary) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 12px 42px rgba(2,6,23,0.62) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Mantener hero/header con su propio gradiente pero dentro del cuadro blanco */
+.dashboard-container[data-theme="light"] .header-card {
+  background: linear-gradient(135deg, #9333EA 0%, #A855F7 50%, #EC4899 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(15,23,42,0.08);
+}
+
+/* Light-mode text & button defaults: asegurar texto oscuro y botones visibles sin hover */
+.dashboard-container[data-theme="light"] {
+  color: #0f172a; /* texto negro/oscuro por defecto */
+}
+
+.dashboard-container[data-theme="light"] .btn-header,
+.dashboard-container[data-theme="light"] .btn {
+  /* Botones visibles por defecto: fondo claro y borde sutil con texto oscuro */
+  background: #F3F4F6;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: none;
+}
+
+.dashboard-container[data-theme="light"] .btn-header.primary,
+.dashboard-container[data-theme="light"] .btn.primary {
+  /* Botón primario con el degradado morado y texto blanco para destacar */
+  background: linear-gradient(90deg,#7C3AED,#9333EA);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 24px rgba(124,58,237,0.12);
+}
+
+.dashboard-container[data-theme="light"] .btn-header.cancel,
+.dashboard-container[data-theme="light"] .btn.cancel {
+  background: #eef2ff;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+/* Make action-card buttons visible on white cards (if present) */
+.dashboard-container[data-theme="light"] .card .action-card-btn {
+  background: #F9FAFB;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+/* Header Card */
+.header-card {
+  background: linear-gradient(135deg, #9333EA 0%, #A855F7 50%, #EC4899 100%);
+  border-radius: 24px;
+  padding: 2rem;
+  color: white;
+  box-shadow: 0 4px 20px rgba(147, 51, 234, 0.25);
+  margin-bottom: 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 300px;
+}
+
+.header-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  max-width: 500px;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-header {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: none;
+  padding: 0.625rem 1rem;
+  border-radius: 50px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-header:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Primary / Cancel variants for header buttons */
+.btn-header.primary {
+  background: linear-gradient(90deg,#7C3AED,#9333EA);
+  color: #ffffff;
+}
+.btn-header.cancel {
+  background: rgba(243,244,246,1);
+  color: #111827;
+}
+
+/* ====================
+   Midnight theme adjustments for HomePageLogueado
+   These rules ensure all major surfaces adapt to the --bg / --text theme variables
+   and remove harsh fixed-color backgrounds in favor of theme-aware values.
+   ==================== */
+[data-theme="midnight"] body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="midnight"] .header-card {
+  /* Keep the same purple/pink hero gradient but darker for midnight */
+  background: linear-gradient(135deg, #5b21a8 0%, #4c1f8f 50%, #b23a7a 100%);
+  color: var(--text-primary);
+  box-shadow: 0 10px 40px rgba(2,6,23,0.65);
+}
+
+[data-theme="midnight"] .header-subtitle {
+  color: rgba(230,238,248,0.85);
+}
+
+[data-theme="midnight"] .btn-header {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+}
+
+[data-theme="midnight"] .btn-header:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+[data-theme="midnight"] .btn-header.primary {
+  /* Use purple gradient but tuned for midnight */
+  background: linear-gradient(90deg,#7c3aed,#6d28d9);
+  color: #ffffff;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+
+[data-theme="midnight"] .btn-header.cancel {
+  background: rgba(255,255,255,0.02);
+  color: rgba(230,238,248,0.9);
+}
+
+[data-theme="midnight"] .stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+}
+
+[data-theme="midnight"] .activity-item {
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.02);
+  box-shadow: none;
+}
+
+[data-theme="midnight"] .stat-value {
+  color: var(--text-primary);
+}
+
+[data-theme="midnight"] .stat-label {
+  color: rgba(230,238,248,0.85);
+}
+
+[data-theme="midnight"] .chart-card,
+[data-theme="midnight"] .habits-card,
+[data-theme="midnight"] .action-card,
+[data-theme="midnight"] .chart-card,
+[data-theme="midnight"] .habits-card,
+[data-theme="midnight"] .action-card,
+[data-theme="midnight"] .activity-card,
+[data-theme="midnight"] .stat-card {
+  background: var(--bg-secondary);
+  /* Stronger, more visible border for midnight */
+  border: 1px solid rgba(255,255,255,0.14);
+  /* Add subtle inset violet glow + deeper shadow for separation */
+  box-shadow: 0 12px 42px rgba(2,6,23,0.62), inset 0 0 0 1px rgba(124,58,237,0.04);
+}
+
+/* Activity items need a slightly thicker border so card edges read clearly */
+[data-theme="midnight"] .activity-item {
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.55), inset 0 0 0 1px rgba(124,58,237,0.035);
+}
+
+/* Action card buttons and pills: keep contrast but add a faint border */
+[data-theme="midnight"] .action-card .action-card-btn {
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Midnight overrides for habits cards & modal */
+[data-theme="midnight"] .habit-card {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 12px 40px rgba(2,6,23,0.6), inset 0 0 0 1px rgba(124,58,237,0.035);
+}
+
+[data-theme="midnight"] .habit-desc,
+[data-theme="midnight"] .habit-stats,
+[data-theme="midnight"] .field-label {
+  color: rgba(255,255,255,0.75);
+}
+
+[data-theme="midnight"] .habits-modal {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 24px 80px rgba(2,6,23,0.6);
+}
+
+[data-theme="midnight"] .habits-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+}
+
+/* Make hover state slightly brighter to emphasize interactivity */
+[data-theme="midnight"] .chart-card:hover,
+[data-theme="midnight"] .habits-card:hover,
+[data-theme="midnight"] .action-card:hover,
+[data-theme="midnight"] .activity-card:hover,
+[data-theme="midnight"] .stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 60px rgba(2,6,23,0.72), inset 0 0 0 1px rgba(124,58,237,0.06);
+}
+
+[data-theme="midnight"] .activity-item.purple {
+  background: linear-gradient(90deg, rgba(124,58,237,0.06) 0%, rgba(236,72,153,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-theme="midnight"] .view-all-btn,
+[data-theme="midnight"] .action-card-btn.purple,
+[data-theme="midnight"] .action-card-btn { 
+  color: var(--text-primary);
+}
+
+/* Make the Recordatorio card text clearly visible in midnight (force white)
+   and make its input/button use a purple pill instead of white so it stands out */
+[data-theme="midnight"] .action-card.purple .action-card-title,
+[data-theme="midnight"] .action-card.purple .action-card-description {
+  color: #ffffff; /* force white text for title/description */
+}
+
+[data-theme="midnight"] .action-card.purple .action-card-btn,
+[data-theme="midnight"] .action-card.purple input,
+[data-theme="midnight"] .action-card.purple .recordatorio-input {
+  background: linear-gradient(90deg,#7C3AED,#6D28D9);
+  color: #ffffff;
+  border: none;
+}
+
+/* If the card button keeps the full-width white style elsewhere, keep hover subtle */
+[data-theme="midnight"] .action-card.purple .action-card-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 18px rgba(109,40,217,0.25);
+}
+
+[data-theme="midnight"] .header-card .streak-badge {
+  background: rgba(255,255,255,0.02);
+}
+
+/* Additional midnight overrides requested by user:
+   - Make stat numbers, chart labels (días), mood legend text & percentages,
+     and recent activity content white for better contrast in midnight theme.
+*/
+[data-theme="midnight"] .stat-value {
+  color: #ffffff;
+}
+
+/* Chart XAxis labels (días de la semana) and any SVG text inside chart cards */
+[data-theme="midnight"] .area-chart .recharts-cartesian-axis-tick text,
+[data-theme="midnight"] .area-chart .recharts-cartesian-axis text,
+[data-theme="midnight"] .chart-card .recharts-cartesian-axis text,
+[data-theme="midnight"] .chart-card .recharts-wrapper text {
+  fill: rgba(255,255,255,0.92) !important;
+}
+
+[data-theme="midnight"] .chart-title {
+  color: rgba(255,255,255,0.95);
+}
+
+/* Estado de ánimo: labels y porcentajes en la leyenda */
+[data-theme="midnight"] .mood-legend .legend-label,
+[data-theme="midnight"] .mood-legend .legend-value,
+[data-theme="midnight"] .legend-label,
+[data-theme="midnight"] .legend-value {
+  color: rgba(255,255,255,0.9);
+}
+
+/* Actividad reciente: forzar texto blanco en modo midnight */
+[data-theme="midnight"] .activity-card,
+[data-theme="midnight"] .activity-card .activity-item,
+[data-theme="midnight"] .activity-card .activity-title,
+[data-theme="midnight"] .activity-card .activity-description,
+[data-theme="midnight"] .activity-card .activity-meta,
+[data-theme="midnight"] .activity-card .activity-content {
+  color: rgba(255,255,255,0.95);
+}
+
+/* Ensure small labels also contrast */
+[data-theme="midnight"] .activity-card .activity-meta .text-xs,
+[data-theme="midnight"] .activity-card .activity-description {
+  color: rgba(255,255,255,0.75);
+}
+
+
+.streak-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.streak-label {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+}
+
+.streak-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Stats Cards Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #F3F4F6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.purple { background: #F3E8FF; color: #9333EA; }
+.stat-icon.green { background: #D1FAE5; color: #059669; }
+.stat-icon.blue { background: #DBEAFE; color: #2563EB; }
+.stat-icon.orange { background: #FED7AA; color: #EA580C; }
+
+.stat-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 50px;
+}
+
+.stat-badge.positive {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.stat-badge.negative {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #F3F4F6;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 50px;
+  transition: width 0.5s ease;
+}
+
+.progress-fill.purple { background: #9333EA; }
+.progress-fill.green { background: #059669; }
+.progress-fill.blue { background: #2563EB; }
+.progress-fill.orange { background: #EA580C; }
+
+/* Charts Section */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #F3F4F6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.chart-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.5rem 0.875rem;
+  border-radius: 50px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.filter-btn.active {
+  background: #F3E8FF;
+  color: #7C3AED;
+}
+
+.filter-btn:not(.active) {
+  background: transparent;
+  color: #6B7280;
+}
+
+.filter-btn:not(.active):hover {
+  background: #F3F4F6;
+}
+
+.filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.filter-dot.purple { background: #9333EA; }
+.filter-dot.pink { background: #EC4899; }
+.filter-dot.blue { background: #3B82F6; }
+
+/* Area Chart */
+.area-chart {
+  position: relative;
+  height: 240px;
+  width: 100%;
+}
+
+/* Pie Chart */
+.pie-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.mood-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.legend-left {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-dot.excellent { background: #10B981; }
+.legend-dot.good { background: #3B82F6; }
+.legend-dot.regular { background: #FBBF24; }
+.legend-dot.bad { background: #EF4444; }
+
+.legend-label {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.legend-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Habits Section */
+.habits-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #F3F4F6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+/* Habit cards layout (detailed cards used in HomePageLogueado) */
+.habits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.habit-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-light);
+}
+.habit-left { display:flex; gap:12px; align-items:center; }
+.habit-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; }
+.habit-icon.purple { background: linear-gradient(135deg,#7C3AED,#9333EA); }
+.habit-icon.green { background: linear-gradient(135deg,#10B981,#059669); }
+.habit-icon.blue { background: linear-gradient(135deg,#3B82F6,#2563EB); }
+.habit-icon.pink { background: linear-gradient(135deg,#EC4899,#DB2777); }
+.habit-name { font-weight:700; color:var(--text-primary); }
+.habit-desc { font-size:0.85rem; color:var(--text-tertiary); }
+.habit-meta { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.habit-progress { height:8px; background: #ffffff; border-radius:999px; overflow:hidden; transition: background-color 0.2s ease; }
+.habit-progress-fill { height:100%; border-radius:999px; }
+.habit-stats { font-size:0.8rem; color:var(--text-tertiary); text-align:right; }
+
+/* Modal styles for habits (theme-aware) */
+.habits-modal-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.45); z-index:1000; }
+.habits-modal { width: min(760px,95%); background: var(--bg-primary); color: var(--text-primary); border-radius:12px; padding:20px; box-shadow: 0 20px 60px rgba(2,6,23,0.4); border:1px solid var(--border-default); }
+.habits-modal-title { margin:0 0 12px 0; font-size:1.125rem; font-weight:700; }
+.habits-modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.habits-field { display:flex; flex-direction:column; }
+.field-label { font-size:12px; margin-bottom:6px; color:var(--text-tertiary); }
+.habits-input { padding:10px 12px; border-radius:8px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text-primary); }
+.habits-modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+.habits-modal-error { color:var(--state-danger-primary); margin-top:12px; }
+.habits-modal-success { color:var(--state-success-primary); margin-top:12px; }
+
+.habits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.configure-btn {
+  color: #9333EA;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.configure-btn:hover {
+  color: #7C3AED;
+}
+
+.habits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.habit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.habit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.habit-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.habit-counter {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.habit-progress {
+  height: 8px;
+  background: #F3F4F6;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.habit-progress-fill {
+  height: 100%;
+  border-radius: 50px;
+  transition: width 0.5s ease;
+}
+
+.habit-progress-fill.purple { background: #9333EA; }
+.habit-progress-fill.pink { background: #EC4899; }
+
+.habit-detail {
+  font-size: 0.75rem;
+  color: #6B7280;
+  font-weight: 500;
+  padding-top: 0.25rem;
+}
+
+.habit-mark {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding-top: 0.25rem;
+  transition: opacity 0.2s ease;
+}
+
+.habit-mark.purple { color: #9333EA; }
+.habit-mark.pink { color: #EC4899; }
+
+.habit-mark:hover {
+  opacity: 0.8;
+}
+
+/* small inline buttons used in habit cards */
+.btn-small {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(15,23,42,0.06);
+  border: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.btn-small:hover { opacity: 0.92; transform: translateY(-1px); }
+
+/* Action Cards */
+.action-cards-grid {
+  display: grid;
+  /* Usar columnas responsivas: cada tarjeta ocupa al menos 260px y se distribuyen uniformemente.
+     Esto facilita mantener 3 tarjetas centradas con espacio uniforme entre ellas. */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem; /* aumentar un poco el gap para separación visual más cómoda */
+  margin: 0 auto 1.5rem;
+  max-width: 1200px; /* limitar ancho para evitar que las tarjetas se estiren demasiado en pantallas muy anchas */
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+.action-card.large {
+  min-height: 180px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch; /* asegurar que el contenido se alinee y las tarjetas tengan la misma anchura interna */
+}
+
+/* Centrar los botones dentro de las tarjetas grandes para mejor presencia en light mode */
+.action-card.large .action-card-btn {
+  width: auto;
+  align-self: center;
+  min-width: 160px;
+}
+
+.action-card {
+  border-radius: 20px;
+  padding: 1.5rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.action-card.purple {
+  background: linear-gradient(135deg, #9333EA 0%, #7C3AED 100%);
+}
+
+.action-card.pink {
+  background: linear-gradient(135deg, #EC4899 0%, #DB2777 100%);
+}
+
+.action-card.blue {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.action-card.green {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+/* Inputs inside colored action-cards: tint them with a subtle, card-related color so they
+   feel integrated but still readable and visually distinct from the card background. */
+.action-card input,
+.action-card .recordatorio-input,
+.action-card .action-input {
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-weight: 600;
+  outline: none;
+  transition: box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.action-card.purple input,
+.action-card.purple .recordatorio-input,
+.action-card.purple .action-input {
+  background: linear-gradient(90deg, rgba(124,58,237,0.14), rgba(124,58,237,0.10));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.action-card.pink input,
+.action-card.pink .recordatorio-input,
+.action-card.pink .action-input {
+  background: linear-gradient(90deg, rgba(236,72,153,0.14), rgba(236,72,153,0.10));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.action-card.blue input,
+.action-card.blue .recordatorio-input,
+.action-card.blue .action-input {
+  background: linear-gradient(90deg, rgba(59,130,246,0.12), rgba(59,130,246,0.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.action-card.green input,
+.action-card.green .recordatorio-input,
+.action-card.green .action-input {
+  background: linear-gradient(90deg, rgba(16,185,129,0.12), rgba(16,185,129,0.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.action-card input::placeholder,
+.action-card .recordatorio-input::placeholder,
+.action-card .action-input::placeholder {
+  color: rgba(255,255,255,0.8);
+  opacity: 0.9;
+}
+
+.action-card input:focus,
+.action-card .recordatorio-input:focus,
+.action-card .action-input:focus {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18), 0 0 0 4px rgba(255,255,255,0.03) inset;
+  transform: translateY(-1px);
+}
+
+.action-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.action-card-description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.action-card-btn {
+  width: 100%;
+  background: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-card-btn.purple { color: #7C3AED; }
+.action-card-btn.pink { color: #DB2777; }
+.action-card-btn.blue { color: #2563EB; }
+.action-card-btn.green { color: #059669; }
+
+.action-card-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones que toman la paleta de su tarjeta pero siguen siendo distinguibles
+   Usamos un degradado afin al de la tarjeta y texto blanco para contraste.
+   Mantener también una versión sutil para el focus/hover. */
+.action-card.purple .action-card-btn {
+  background: linear-gradient(90deg,#7C3AED 0%, #6D28D9 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 22px rgba(124,58,237,0.18);
+}
+
+.action-card.purple .action-card-btn:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 12px 36px rgba(124,58,237,0.22);
+}
+
+.action-card.pink .action-card-btn {
+  background: linear-gradient(90deg,#EC4899 0%, #DB2777 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 22px rgba(236,72,153,0.16);
+}
+.action-card.pink .action-card-btn:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 36px rgba(236,72,153,0.2); }
+
+.action-card.blue .action-card-btn {
+  background: linear-gradient(90deg,#2563EB 0%, #3B82F6 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 22px rgba(59,130,246,0.14);
+}
+.action-card.blue .action-card-btn:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 36px rgba(59,130,246,0.18); }
+
+.action-card.green .action-card-btn {
+  background: linear-gradient(90deg,#059669 0%, #10B981 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 22px rgba(16,185,129,0.14);
+}
+.action-card.green .action-card-btn:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 36px rgba(16,185,129,0.18); }
+
+/* Activity Section */
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+/* Contenedor principal de Actividad Reciente: borde más definido y algo más ancho
+   que las tarjetas de acción para destacar visualmente. Centrado y con padding. */
+.activity-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  border: 1px solid rgba(15,23,42,0.06); /* borde más visible y consistente con otras tarjetas */
+  max-width: 1260px; /* un poco más ancho que las action-cards (1200px) */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.activity-item.clickable {
+  cursor: pointer;
+}
+
+.activity-item.clickable:focus {
+  /* Eliminar línea morada en foco */
+  outline: none;
+  outline-offset: 0;
+}
+/* focus styles declared above */
+
+.view-all-btn {
+  color: #9333EA;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.view-all-btn:hover {
+  color: #7C3AED;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+}
+
+.activity-item:hover {
+  transform: translateX(4px);
+}
+
+.activity-item.purple {
+  background: linear-gradient(90deg, rgba(147,51,234,0.08) 0%, rgba(236,72,153,0.04) 100%);
+  /* eliminar línea morada: usar borde neutro ligero */
+  border: 1px solid rgba(0,0,0,0.03);
+}
+.activity-item.purple:hover {
+  background: linear-gradient(90deg, rgba(147,51,234,0.12) 0%, rgba(236,72,153,0.06) 100%);
+}
+
+.activity-item.green {
+  background: linear-gradient(90deg, rgba(16,185,129,0.06) 0%, rgba(6,182,212,0.03) 100%);
+  border: 1px solid rgba(16,185,129,0.06);
+}
+
+.activity-item.green:hover {
+  background: linear-gradient(90deg, rgba(16,185,129,0.10) 0%, rgba(6,182,212,0.05) 100%);
+}
+
+.activity-item.blue {
+  background: linear-gradient(90deg, rgba(59,130,246,0.06) 0%, rgba(59,130,246,0.03) 100%);
+  border: 1px solid rgba(59,130,246,0.06);
+}
+
+.activity-item.blue:hover {
+  background: linear-gradient(90deg, rgba(59,130,246,0.10) 0%, rgba(59,130,246,0.05) 100%);
+}
+
+.activity-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+}
+
+.activity-avatar.purple { background: linear-gradient(135deg,#9333EA,#EC4899); }
+.activity-avatar.green { background: linear-gradient(135deg,#10B981,#059669); }
+.activity-avatar.blue { background: linear-gradient(135deg,#3B82F6,#2563EB); }
+
+.activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-meta {
+  min-width: 120px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.activity-actions .action-btn,
+.activity-actions .action-btn:focus {
+  outline: none;
+}
+
+.action-btn {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.action-btn.edit {
+  background: linear-gradient(90deg,#7C3AED,#9333EA);
+  color: white;
+}
+
+.action-btn.delete {
+  background: linear-gradient(90deg,#FB7185,#F97316);
+  color: white;
+}
+
+.activity-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.activity-description {
+  font-size: 0.75rem;
+  color: #6B7280;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  
+  .header-card {
+    padding: 1.5rem;
+  }
+  
+  .header-title {
+    font-size: 1.5rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .habits-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}

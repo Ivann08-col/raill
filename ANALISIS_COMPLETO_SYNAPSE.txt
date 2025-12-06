@@ -1,0 +1,1302 @@
+================================================================================
+PROYECTO SYNAPSE - ANALISIS COMPLETO DEL SISTEMA
+================================================================================
+Base de Datos: MySQL (synapse_db)
+Backend: Flask (Python)
+Frontend: React + Vite
+16 Tablas principales documentadas
+
+================================================================================
+1. TABLA: USUARIO
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Almacena informacion de usuarios del sistema. Cada usuario tiene credenciales unicas, 
+perfil personal y datos de acceso. Es la tabla central que se relaciona con practicamente 
+todas las demas tablas.
+
+CAMPOS PRINCIPALES:
+- id_usuario (STRING UUID, PK): Identificador unico del usuario
+- username (STRING 100, UNIQUE): Nombre de usuario para login
+- correo (STRING 100, UNIQUE): Email unico del usuario
+- password (STRING 255): Contraseña hasheada con werkzeug
+- avatar_url (STRING 255, NULLABLE): URL de la foto de perfil
+- fecha_registro (DATETIME): Timestamp de cuando se creo la cuenta
+- ultimo_acceso (DATETIME, NULLABLE): Timestamp del ultimo login
+- rol_id (INTEGER, FK -> rol.id): Rol del usuario (admin/usuario)
+- activo (BOOLEAN): Indica si la cuenta esta activa
+- nombre_completo (STRING 200, NULLABLE): Nombre completo del usuario
+- telefono (STRING 20, NULLABLE): Numero de contacto
+- ubicacion (STRING 200, NULLABLE): Localizacion del usuario
+- fecha_nacimiento (DATE, NULLABLE): Fecha de nacimiento
+- descripcion (TEXT, NULLABLE): Bio o descripcion personal
+- preferencias (JSON, NULLABLE): Preferencias del usuario (habitos, ajustes)
+
+RELACIONES CON OTRAS TABLAS:
+- usuario -> rol: Muchos a Uno (cada usuario tiene un rol)
+- usuario -> tarea: Uno a Muchos (un usuario puede tener muchas tareas)
+- usuario -> sesion: Uno a Muchos (un usuario tiene multiples sesiones)
+- usuario -> usuario_sala: Uno a Muchos (un usuario puede estar en varias salas)
+- usuario -> recompensa_usuario: Uno a Muchos (relacion con recompensas obtenidas)
+- usuario -> progreso: Uno a Muchos (registro diario de progreso)
+- usuario -> estado_animo: Uno a Muchos (registro de estados de animo)
+- usuario -> sala (como creador): Uno a Muchos (usuario crea salas)
+- usuario -> mensaje_sala: Uno a Muchos (usuario envia mensajes en salas)
+- usuario -> password_reset_code: Uno a Muchos (codigos de recuperacion)
+
+RUTAS BACKEND DISPONIBLES (usuario_routes.py):
+- GET /api/usuario (lista todos los usuarios) - JWT requerido
+- GET /api/usuario/<usuario_id> (obtiene un usuario especifico) - JWT requerido
+- POST /api/usuario (crea nuevo usuario) - JWT requerido
+- PUT /api/usuario/<usuario_id> (actualiza usuario) - JWT requerido
+- PUT /api/usuario/<usuario_id>/preferencias (actualiza preferencias) - JWT requerido
+- DELETE /api/usuario/<usuario_id> (desactiva usuario soft-delete) - JWT requerido
+
+RUTAS AUTH (auth.py):
+- POST /api/auth/register (registro de nuevo usuario)
+- POST /api/auth/request-password-reset (solicita codigo de recuperacion)
+- POST /api/auth/reset-password (restablece contraseña con codigo)
+
+JSON ESPERADO DEL FRONTEND (POST crear usuario):
+{
+  "username": "juan_perez",
+  "correo": "juan@example.com",
+  "password": "SecurePass123!",
+  "nombre_completo": "Juan Perez",
+  "telefono": "+34 666 123456",
+  "ubicacion": "Madrid, Spain",
+  "fecha_nacimiento": "1990-05-15",
+  "descripcion": "Mi bio",
+  "preferencias": {
+    "tema": "oscuro",
+    "notificaciones": true,
+    "idioma": "es"
+  }
+}
+
+JSON ESPERADO DEL FRONTEND (PUT actualizar usuario):
+{
+  "username": "nuevo_username",
+  "correo": "nuevo@email.com",
+  "nombre_completo": "Juan Perez",
+  "password": "NewPassword123!",
+  "preferencias": {"tema": "claro"},
+  "activo": true
+}
+
+JSON QUE DEVUELVE EL BACKEND (GET usuario):
+{
+  "id_usuario": "550e8400-e29b-41d4-a716-446655440000",
+  "username": "juan_perez",
+  "correo": "juan@example.com",
+  "fecha_registro": "2025-01-15T10:30:00",
+  "ultimo_acceso": "2025-01-20T14:45:00",
+  "rol_id": 2,
+  "activo": true,
+  "nombre_completo": "Juan Perez",
+  "telefono": "+34 666 123456",
+  "ubicacion": "Madrid, Spain",
+  "fecha_nacimiento": "1990-05-15",
+  "descripcion": "Mi bio",
+  "preferencias": {"tema": "oscuro", "notificaciones": true},
+  "avatar_url": "https://example.com/avatars/550e8400.jpg"
+}
+
+DONDE SE USA EN FRONTEND:
+- auth.jsx: Servicio para autenticacion y manejo de usuarios
+- Componentes de perfil: Edicion de datos personales
+- Dashboard: Mostrar informacion del usuario actual
+- Salas: Mostrar participantes de una sala
+- Config.jsx: Configuracion de preferencias del usuario
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS DESDE FRONTEND:
+// Obtener usuario actual
+axios.get('/api/usuario/550e8400-e29b-41d4-a716-446655440000', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Actualizar preferencias
+axios.put('/api/usuario/550e8400-e29b-41d4-a716-446655440000/preferencias', {
+  preferencias: { tema: "claro", idioma: "en" }
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Registrar nuevo usuario
+axios.post('/api/auth/register', {
+  username: 'nuevo_usuario',
+  correo: 'nuevo@email.com',
+  password: 'SecurePass123!'
+})
+
+================================================================================
+2. TABLA: ROL
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Define los roles del sistema (admin, usuario). Cada usuario tiene asignado un rol 
+que determina sus permisos en el sistema.
+
+CAMPOS PRINCIPALES:
+- id (INTEGER, PK): Identificador del rol
+- nombre (STRING 50, UNIQUE): Nombre del rol (admin, usuario, moderador)
+
+RELACIONES CON OTRAS TABLAS:
+- rol -> usuario: Uno a Muchos (un rol tiene muchos usuarios)
+
+RUTAS BACKEND:
+No hay rutas CRUD publicas para roles. Se gestionan en admin_routes.py
+
+JSON ESPERADO: N/A (gestionado internamente)
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id": 2,
+  "nombre": "usuario"
+}
+
+DONDE SE USA EN FRONTEND:
+- Componentes de autenticacion: Determinan niveles de acceso
+- Admin panel: Cambiar rol de usuarios
+- Validaciones: Verificar permisos del usuario
+
+EJEMPLOS:
+// Obtener roles (si existe endpoint)
+axios.get('/api/roles', { headers: { Authorization: 'Bearer TOKEN' } })
+
+================================================================================
+3. TABLA: TAREA
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Almacena tareas individuales de usuarios. Cada tarea tiene estado, prioridad, 
+fecha de vencimiento y puede estar asociada a una sala grupal. Las tareas pueden 
+ser personales o de una sala.
+
+CAMPOS PRINCIPALES:
+- id_tarea (STRING UUID, PK): Identificador unico de la tarea
+- usuario_id (STRING UUID, FK -> usuario.id_usuario): Dueno de la tarea
+- sala_id (STRING UUID, FK -> sala.id_sala, NULLABLE): Sala asociada
+- titulo (STRING 200): Titulo descriptivo de la tarea
+- descripcion (TEXT, NULLABLE): Descripcion detallada
+- fecha_creacion (DATETIME): Cuando se creo la tarea
+- completada (BOOLEAN): Si esta marcada como completada
+- estado (STRING 20): Estado actual (Pendiente, EnProgreso, EnEspera, Completado)
+- fecha_vencimiento (DATE, NULLABLE): Fecha limite para completarla
+- prioridad (STRING 20): Nivel de prioridad (baja, media, alta)
+- comentario (TEXT, NULLABLE): Comentarios o notas adicionales
+
+RELACIONES CON OTRAS TABLAS:
+- tarea -> usuario: Muchos a Uno (varias tareas de un usuario)
+- tarea -> sala: Muchos a Uno (tareas pueden ser de una sala)
+
+RUTAS BACKEND (tarea_routes.py):
+- GET /api/tarea (lista tareas del usuario actual con filtros)
+- GET /api/tarea/<id_tarea> (obtiene tarea especifica)
+- POST /api/tarea (crea nueva tarea)
+- PUT /api/tarea/<id_tarea> (actualiza tarea)
+- DELETE /api/tarea/<id_tarea> (elimina tarea)
+
+PARAMETROS DE FILTRO (GET):
+- sala_id: Filtrar por sala
+- estado: Filtrar por estado
+- prioridad: Filtrar por prioridad
+
+JSON ESPERADO DEL FRONTEND (POST crear tarea):
+{
+  "titulo": "Estudiar React",
+  "descripcion": "Aprender hooks y contexto",
+  "fecha_vencimiento": "2025-02-15",
+  "prioridad": "alta",
+  "sala_id": "550e8400-e29b-41d4-a716-446655440000",
+  "comentario": "Importante para el proyecto"
+}
+
+JSON ESPERADO DEL FRONTEND (PUT actualizar tarea):
+{
+  "titulo": "Estudiar React avanzado",
+  "descripcion": "Aprender render props",
+  "estado": "EnProgreso",
+  "prioridad": "media",
+  "fecha_vencimiento": "2025-02-20",
+  "comentario": "Ahora es menos urgente"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_tarea": "550e8400-e29b-41d4-a716-446655440000",
+  "usuario_id": "550e8400-e29b-41d4-a716-446655440001",
+  "titulo": "Estudiar React",
+  "descripcion": "Aprender hooks y contexto",
+  "fecha_creacion": "2025-01-20T10:30:00",
+  "completada": false,
+  "estado": "Pendiente",
+  "fecha_vencimiento": "2025-02-15",
+  "prioridad": "alta",
+  "comentario": "Importante para el proyecto",
+  "sala_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+
+DONDE SE USA EN FRONTEND:
+- pages/Tareas.jsx: Listado y gestion de tareas
+- services/tareas.jsx: Servicio de llamadas API
+- Componentes de dashboard: Mostrar tareas proximas a vencer
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener todas las tareas del usuario
+axios.get('/api/tarea', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener tareas de una sala especifica
+axios.get('/api/tarea?sala_id=550e8400&estado=Pendiente', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Crear una tarea
+axios.post('/api/tarea', {
+  titulo: 'Nueva tarea',
+  fecha_vencimiento: '2025-02-15',
+  prioridad: 'media'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Actualizar estado de una tarea
+axios.put('/api/tarea/550e8400-e29b-41d4-a716-446655440000', {
+  estado: 'Completado'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+4. TABLA: SALA
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Salas de estudio/trabajo colaborativo. Las salas pueden ser publicas o privadas 
+(con codigo de acceso). Un usuario crea la sala y otros se unen a ella. Las salas 
+contienen participantes, sesiones grupales y mensajes.
+
+CAMPOS PRINCIPALES:
+- id_sala (STRING UUID, PK): Identificador unico de la sala
+- nombre (STRING 100): Nombre de la sala
+- descripcion (TEXT, NULLABLE): Descripcion de la sala
+- fecha_creacion (DATETIME): Cuando se creo la sala
+- creador_id (STRING UUID, FK -> usuario.id_usuario): Usuario que la creo
+- max_participantes (INTEGER, NULLABLE): Limite de participantes
+- es_privada (BOOLEAN): Si requiere codigo de acceso
+- codigo_acceso (STRING 6, NULLABLE): Codigo para salas privadas
+- estado (STRING 20): Estado de la sala (activa, pausada, cerrada)
+
+RELACIONES CON OTRAS TABLAS:
+- sala -> usuario (creador): Muchos a Uno
+- sala -> usuario_sala: Uno a Muchos (participantes de la sala)
+- sala -> sala_sesion: Uno a Muchos (sesiones grupales)
+- sala -> tarea: Uno a Muchos (tareas de la sala)
+- sala -> mensaje_sala: Uno a Muchos (mensajes en la sala)
+
+RUTAS BACKEND (sala_routes.py):
+- GET /api/sala (salas donde el usuario es miembro activo)
+- GET /api/sala/publicas (todas las salas publicas)
+- GET /api/sala/<sala_id> (detalles de una sala con participantes)
+- POST /api/sala (crear nueva sala)
+- PUT /api/sala/<sala_id>/actualizar (actualizar datos de la sala)
+- POST /api/sala/<sala_id>/unirse (unirse a una sala publica)
+- POST /api/sala/<sala_id>/unirse-privada (unirse con codigo)
+- POST /api/sala/<sala_id>/salir (salir de una sala)
+
+JSON ESPERADO DEL FRONTEND (POST crear sala):
+{
+  "nombre": "Estudio de React",
+  "descripcion": "Sala para estudiar React en grupo",
+  "max_participantes": 20,
+  "es_privada": false
+}
+
+JSON ESPERADO DEL FRONTEND (POST unirse a sala privada):
+{
+  "codigo_acceso": "ABC123"
+}
+
+JSON QUE DEVUELVE EL BACKEND (GET sala):
+{
+  "id_sala": "550e8400-e29b-41d4-a716-446655440000",
+  "nombre": "Estudio de React",
+  "descripcion": "Sala para estudiar React en grupo",
+  "fecha_creacion": "2025-01-15T10:30:00",
+  "creador_id": "550e8400-e29b-41d4-a716-446655440001",
+  "max_participantes": 20,
+  "es_privada": false,
+  "codigo_acceso": null,
+  "estado": "activa",
+  "participantes": [
+    {
+      "id_usuario": "550e8400-e29b-41d4-a716-446655440001",
+      "username": "juan",
+      "correo": "juan@example.com",
+      "rol_en_sala": "lider"
+    }
+  ],
+  "total_participantes": 1
+}
+
+DONDE SE USA EN FRONTEND:
+- pages/Salas.jsx: Listado de salas
+- pages/DetalleSala.jsx: Vista detallada de una sala
+- services/sala.jsx: Servicio de API
+- Componentes de chat: Mensajes en salas
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener todas las salas del usuario
+axios.get('/api/sala', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Crear nueva sala
+axios.post('/api/sala', {
+  nombre: 'Estudio Matutino',
+  descripcion: 'Sesiones de estudio por las mañanas',
+  es_privada: true
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Unirse a una sala privada
+axios.post('/api/sala/550e8400-e29b-41d4-a716-446655440000/unirse-privada', {
+  codigo_acceso: 'ABC123'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener detalles de una sala
+axios.get('/api/sala/550e8400-e29b-41d4-a716-446655440000', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+5. TABLA: SESION
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Registra sesiones de meditacion/estudio individual o grupal. Cada sesion tiene 
+una tecnica asociada, duracion real, fecha de inicio/fin y estado. Permite rastrear 
+el tiempo dedicado a cada tecnica de concentracion.
+
+CAMPOS PRINCIPALES:
+- id_sesion (STRING UUID, PK): Identificador unico
+- usuario_id (STRING UUID, FK -> usuario.id_usuario): Usuario que realizo la sesion
+- tecnica_id (STRING UUID, FK -> tecnica.id_tecnica): Tecnica utilizada
+- fecha_inicio (DATETIME): Cuando comenzo la sesion
+- fecha_fin (DATETIME, NULLABLE): Cuando termino la sesion
+- duracion_real (INTEGER, NULLABLE): Duracion en segundos/minutos que duro realmente
+- estado (STRING 20): Estado (Pendiente, EnProgreso, Completado, Cancelado)
+- es_grupal (BOOLEAN): Si fue una sesion grupal
+
+RELACIONES CON OTRAS TABLAS:
+- sesion -> usuario: Muchos a Uno
+- sesion -> tecnica: Muchos a Uno
+- sesion -> sala_sesion: Uno a Muchos (relacion con salas)
+- sesion -> sesion_tecnica_param: Uno a Muchos (parametros especificos)
+
+RUTAS BACKEND (sesion_routes.py):
+- GET /api/sesion (lista sesiones del usuario con filtros)
+- GET /api/sesion/<sesion_id> (obtiene sesion especifica)
+- POST /api/sesion (crea nueva sesion)
+- PUT /api/sesion/<sesion_id> (actualiza sesion)
+- DELETE /api/sesion/<sesion_id> (elimina sesion)
+
+PARAMETROS DE FILTRO (GET):
+- tecnica_id: Filtrar por tecnica
+- estado: Filtrar por estado
+- es_grupal: true/false
+- fecha_inicio: Desde esta fecha
+- fecha_fin: Hasta esta fecha
+
+JSON ESPERADO DEL FRONTEND (POST crear sesion):
+{
+  "tecnica_id": "550e8400-e29b-41d4-a716-446655440000",
+  "inicio": "2025-01-20T14:00:00Z",
+  "duracion_estimada": 30,
+  "es_grupal": false,
+  "parametros": [
+    {"parametro": "intensidad", "valor": "alta"},
+    {"parametro": "musica", "valor": "no"}
+  ]
+}
+
+JSON ESPERADO DEL FRONTEND (PUT actualizar sesion):
+{
+  "estado": "Completado",
+  "duracion_real": 1800,
+  "fecha_fin": "2025-01-20T14:30:00Z"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_sesion": "550e8400-e29b-41d4-a716-446655440000",
+  "usuario_id": "550e8400-e29b-41d4-a716-446655440001",
+  "tecnica_id": "550e8400-e29b-41d4-a716-446655440002",
+  "fecha_inicio": "2025-01-20T14:00:00",
+  "fecha_fin": "2025-01-20T14:30:00",
+  "completada": true,
+  "duracion_real": 1800,
+  "estado": "Completado",
+  "es_grupal": false,
+  "tecnica": {
+    "id_tecnica": "550e8400-e29b-41d4-a716-446655440002",
+    "nombre": "Pomodoro",
+    "descripcion": "Tecnica de 25 minutos",
+    "duracion_estimada": 1500,
+    "categoria": "productividad"
+  },
+  "parametros": [
+    {"parametro": "intensidad", "valor": "alta"},
+    {"parametro": "musica", "valor": "no"}
+  ]
+}
+
+DONDE SE USA EN FRONTEND:
+- pages/Meditacion.jsx: Realizar sesiones de meditacion
+- pages/Pomodoro.jsx: Tecnica pomodoro
+- pages/Concentracion.jsx: Sesiones de concentracion
+- services/sesionGrupal.jsx: Sesiones en grupo
+- Dashboard: Mostrar sesiones recientes
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener todas las sesiones del usuario
+axios.get('/api/sesion', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener sesiones de una tecnica especifica
+axios.get('/api/sesion?tecnica_id=550e8400&estado=Completado', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Crear nueva sesion
+axios.post('/api/sesion', {
+  tecnica_id: '550e8400-e29b-41d4-a716-446655440000',
+  inicio: '2025-01-20T14:00:00Z',
+  es_grupal: false
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Finalizar una sesion
+axios.put('/api/sesion/550e8400-e29b-41d4-a716-446655440000', {
+  estado: 'Completado',
+  duracion_real: 1800,
+  fecha_fin: '2025-01-20T14:30:00Z'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+6. TABLA: TECNICA
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Define las tecnicas de meditacion, concentracion y productividad disponibles en 
+el sistema (Pomodoro, meditacion simple, etc.). Cada tecnica tiene descripcion, 
+duracion estimada y categoria.
+
+CAMPOS PRINCIPALES:
+- id_tecnica (STRING UUID, PK): Identificador unico
+- nombre (STRING 100): Nombre de la tecnica
+- descripcion (TEXT, NULLABLE): Descripcion detallada
+- duracion_estimada (INTEGER, NULLABLE): Duracion estimada en segundos
+- categoria (STRING 50, NULLABLE): Categoria (meditacion, productividad, etc)
+
+RELACIONES CON OTRAS TABLAS:
+- tecnica -> sesion: Uno a Muchos (varias sesiones usan una tecnica)
+
+RUTAS BACKEND (tecnica_routes.py):
+- GET /api/tecnica (lista todas las tecnicas)
+- GET /api/tecnica?categoria=CATEGORIA (filtra por categoria)
+- GET /api/tecnica/populares (tecnicas mas usadas)
+- GET /api/tecnica/<id_tecnica> (obtiene tecnica especifica)
+- POST /api/tecnica (crea nueva tecnica)
+- PUT /api/tecnica/<id_tecnica> (actualiza tecnica)
+- DELETE /api/tecnica/<id_tecnica> (elimina tecnica)
+
+JSON ESPERADO DEL FRONTEND (POST crear tecnica):
+{
+  "nombre": "Respiracion 4-7-8",
+  "descripcion": "Tecnica de respiracion para relajarse",
+  "duracion_estimada": 480,
+  "categoria": "meditacion"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_tecnica": "550e8400-e29b-41d4-a716-446655440000",
+  "nombre": "Pomodoro",
+  "descripcion": "Tecnica de trabajo en bloques de 25 minutos",
+  "duracion_estimada": 1500,
+  "categoria": "productividad"
+}
+
+DONDE SE USA EN FRONTEND:
+- pages/MeditacionSimple.jsx: Seleccionar tecnicas
+- pages/Pomodoro.jsx: Tecnica pomodoro
+- Selectores de tecnicas en varios componentes
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener todas las tecnicas
+axios.get('/api/tecnica', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener tecnicas de meditacion
+axios.get('/api/tecnica?categoria=meditacion', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener tecnicas mas populares
+axios.get('/api/tecnica/populares', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Crear nueva tecnica
+axios.post('/api/tecnica', {
+  nombre: 'Tecnica nueva',
+  categoria: 'meditacion',
+  duracion_estimada: 600
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+7. TABLA: RECOMPENSA
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Define recompensas disponibles en el sistema que pueden ser otorgadas a usuarios 
+por completar objetivos. Cada recompensa tiene un costo en puntos, tipo, valor y 
+requisitos asociados.
+
+CAMPOS PRINCIPALES:
+- id_recompensa (STRING UUID, PK): Identificador unico
+- nombre (STRING 100): Nombre de la recompensa
+- descripcion (TEXT, NULLABLE): Descripcion de la recompensa
+- puntos_requeridos (INTEGER, NULLABLE): Puntos necesarios para obtenerla
+- tipo (STRING 50): Tipo de recompensa (badge, descuento, acceso, etc)
+- valor (INTEGER): Valor numerico de la recompensa
+- requisitos (JSON): Requisitos para obtenerla (ej: sesiones completadas)
+
+RELACIONES CON OTRAS TABLAS:
+- recompensa -> recompensa_usuario: Uno a Muchos (usuarios que la han obtenido)
+
+RUTAS BACKEND (recompensa_routes.py):
+- GET /api/recompensa (obtiene todas las recompensas disponibles)
+- POST /api/recompensa/seed (inserta recompensas iniciales en desarrollo)
+- GET /api/recompensa/<id_recompensa> (obtiene recompensa especifica)
+- POST /api/recompensa (crea nueva recompensa)
+- PUT /api/recompensa/<id_recompensa> (actualiza recompensa)
+- DELETE /api/recompensa/<id_recompensa> (elimina recompensa)
+
+JSON ESPERADO DEL FRONTEND (POST crear recompensa):
+{
+  "nombre": "Badge de 10 sesiones",
+  "descripcion": "Obtenida al completar 10 sesiones",
+  "puntos_requeridos": 500,
+  "tipo": "badge",
+  "valor": 1,
+  "requisitos": {
+    "sesiones_minimas": 10,
+    "dias_consecutivos": false
+  }
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_recompensa": "550e8400-e29b-41d4-a716-446655440000",
+  "nombre": "Badge de 10 sesiones",
+  "descripcion": "Obtenida al completar 10 sesiones",
+  "puntos_requeridos": 500,
+  "tipo": "badge",
+  "valor": 1,
+  "requisitos": {"sesiones_minimas": 10, "dias_consecutivos": false}
+}
+
+DONDE SE USA EN FRONTEND:
+- Componentes de recompensas: Mostrar recompensas disponibles
+- services/recompensasService.jsx: Servicio de recompensas
+- Dashboard: Mostrar recompensas obtenidas
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener todas las recompensas
+axios.get('/api/recompensa', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Crear nueva recompensa
+axios.post('/api/recompensa', {
+  nombre: 'Badge especial',
+  tipo: 'badge',
+  valor: 1,
+  puntos_requeridos: 1000,
+  requisitos: {sesiones_minimas: 20}
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+8. TABLA: PROGRESO
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Registra el progreso diario de cada usuario. Almacena metricas como tareas 
+completadas, sesiones realizadas, minutos de estudio y puntos acumulados por dia.
+
+CAMPOS PRINCIPALES:
+- id_progreso (STRING UUID, PK): Identificador unico
+- usuario_id (STRING UUID, FK -> usuario.id_usuario): Usuario
+- fecha (DATE): Fecha del registro
+- tareas_completadas (INTEGER): Numero de tareas finalizadas ese dia
+- sesiones_completadas (INTEGER): Numero de sesiones terminadas
+- puntos_acumulados (INTEGER): Puntos obtenidos ese dia
+- minutos_estudio (INTEGER): Minutos totales de estudio/meditacion
+- sesiones_realizadas (INTEGER): Total de sesiones realizadas
+
+RELACIONES CON OTRAS TABLAS:
+- progreso -> usuario: Muchos a Uno (cada usuario puede tener multiples registros)
+
+RUTAS BACKEND (progreso_routes.py):
+- GET /api/progreso (obtiene progreso del usuario con filtros de fecha)
+- GET /api/progreso/hoy (obtiene progreso del dia actual)
+- GET /api/progreso/semana (obtiene progreso de la semana actual)
+- GET /api/progreso/mes (obtiene progreso del mes actual)
+- POST /api/progreso/actualizar (actualiza progreso automaticamente)
+
+PARAMETROS DE FILTRO (GET):
+- fecha_inicio: Desde esta fecha
+- fecha_fin: Hasta esta fecha
+
+JSON ESPERADO DEL FRONTEND: N/A (se genera automaticamente)
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_progreso": "550e8400-e29b-41d4-a716-446655440000",
+  "usuario_id": "550e8400-e29b-41d4-a716-446655440001",
+  "fecha": "2025-01-20",
+  "tareas_completadas": 5,
+  "sesiones_completadas": 3,
+  "puntos_acumulados": 150,
+  "minutos_estudio": 120,
+  "sesiones_realizadas": 3
+}
+
+JSON PROGRESO DE SEMANA:
+[
+  {
+    "fecha": "2025-01-20",
+    "tareas_completadas": 5,
+    "sesiones_completadas": 3,
+    "puntos_acumulados": 150,
+    "minutos_estudio": 120
+  },
+  {
+    "fecha": "2025-01-21",
+    "tareas_completadas": 3,
+    "sesiones_completadas": 2,
+    "puntos_acumulados": 100,
+    "minutos_estudio": 90
+  }
+]
+
+DONDE SE USA EN FRONTEND:
+- Dashboard: Mostrar estadisticas del usuario
+- Graficos de progreso: Visualizar avance semanal/mensual
+- pages/Estadisticas.jsx: Analisis detallado del progreso
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener progreso de hoy
+axios.get('/api/progreso/hoy', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener progreso de la semana
+axios.get('/api/progreso/semana', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Actualizar progreso (generalmente automatico)
+axios.post('/api/progreso/actualizar', {}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener progreso con filtro de fechas
+axios.get('/api/progreso?fecha_inicio=2025-01-01&fecha_fin=2025-01-31', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+9. TABLA: ESTADO_ANIMO
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Registra el estado de animo del usuario en momentos especificos. Almacena un valor 
+(1-5 escala) y opcionalmente una nota descriptiva. Permite rastrear patrones de 
+bienestar emocional del usuario.
+
+CAMPOS PRINCIPALES:
+- id_estado (STRING UUID, PK): Identificador unico
+- usuario_id (STRING UUID, FK -> usuario.id_usuario): Usuario
+- valor (INTEGER): Escala de 1 a 5 (muy malo a muy bueno)
+- nota (TEXT, NULLABLE): Notas adicionales sobre el estado emocional
+- creado_en (DATETIME): Timestamp de cuando se registro
+
+RELACIONES CON OTRAS TABLAS:
+- estado_animo -> usuario: Muchos a Uno
+
+RUTAS BACKEND (estado_animo_routes.py):
+- GET /api/estado-animo/historial (obtiene historial con estadisticas)
+- POST /api/estado-animo (registra nuevo estado de animo)
+
+PARAMETROS DE FILTRO (GET):
+- days: Ventana en dias hacia atras (default 30)
+- limit: Limite de entradas (default 50)
+
+JSON ESPERADO DEL FRONTEND (POST):
+{
+  "valor": 4,
+  "nota": "Me siento bien, concentrado en las tareas"
+}
+
+JSON QUE DEVUELVE EL BACKEND (POST):
+{
+  "id_estado": "550e8400-e29b-41d4-a716-446655440000",
+  "usuario_id": "550e8400-e29b-41d4-a716-446655440001",
+  "valor": 4,
+  "nota": "Me siento bien, concentrado",
+  "creado_en": "2025-01-20T15:30:00"
+}
+
+JSON QUE DEVUELVE EL BACKEND (GET historial):
+{
+  "history": [
+    {"date": "2025-01-20", "avg": 4.0},
+    {"date": "2025-01-21", "avg": 3.5}
+  ],
+  "entries": [
+    {
+      "id_estado": "550e8400...",
+      "usuario_id": "550e8400...",
+      "valor": 4,
+      "nota": "Bien",
+      "creado_en": "2025-01-20T15:30:00"
+    }
+  ],
+  "count": 60
+}
+
+DONDE SE USA EN FRONTEND:
+- Componentes de bienestar: Registro de estado emocional
+- Graficos de tendencias: Visualizar patrones de animo
+- Dashboard: Mostrar estado actual del usuario
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Registrar nuevo estado de animo
+axios.post('/api/estado-animo', {
+  valor: 4,
+  nota: 'Sesion productiva hoy'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Obtener historial de estados de animo
+axios.get('/api/estado-animo/historial?days=30&limit=50', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+10. TABLA: USUARIO_SALA
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Tabla de relacion muchos-a-muchos entre usuarios y salas. Almacena la relacion 
+entre un usuario y una sala, incluyendo el rol del usuario en esa sala 
+(lider, participante) y la fecha de union.
+
+CAMPOS PRINCIPALES:
+- id_usuario (STRING UUID, PK, FK -> usuario.id_usuario): Usuario
+- id_sala (STRING UUID, PK, FK -> sala.id_sala): Sala
+- fecha_union (DATETIME): Cuando se unio a la sala
+- rol_en_sala (STRING 50): Rol del usuario (lider, participante, moderador)
+- activo (BOOLEAN): Si la membership esta activa
+
+RELACIONES CON OTRAS TABLAS:
+- usuario_sala -> usuario: Muchos a Uno
+- usuario_sala -> sala: Muchos a Uno
+
+RUTAS BACKEND:
+Gestionada indirectamente a traves de sala_routes.py:
+- POST /api/sala/<sala_id>/unirse (agregar usuario a sala)
+- POST /api/sala/<sala_id>/unirse-privada (unirse con codigo)
+- POST /api/sala/<sala_id>/salir (eliminar usuario de sala)
+- PUT /api/sala/<sala_id>/actualizar (actualizar rol en sala)
+
+JSON ESPERADO DEL FRONTEND (POST unirse):
+{
+  "codigo_acceso": "ABC123"  // Solo si es sala privada
+}
+
+JSON ESPERADO DEL FRONTEND (PUT actualizar):
+{
+  "rol_en_sala": "moderador",
+  "activo": true
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_usuario": "550e8400-e29b-41d4-a716-446655440001",
+  "id_sala": "550e8400-e29b-41d4-a716-446655440000",
+  "fecha_union": "2025-01-15T10:30:00",
+  "rol_en_sala": "lider",
+  "activo": true
+}
+
+DONDE SE USA EN FRONTEND:
+- Componentes de salas: Mostrar participantes
+- Gestion de permisos: Cambiar roles en salas
+- servicios/sala.jsx: Gestion de memberships
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Unirse a una sala publica
+axios.post('/api/sala/550e8400-e29b-41d4-a716-446655440000/unirse', {}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Actualizar rol en una sala
+axios.put('/api/sala/550e8400-e29b-41d4-a716-446655440000/actualizar', {
+  rol_en_sala: 'moderador'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Salir de una sala
+axios.post('/api/sala/550e8400-e29b-41d4-a716-446655440000/salir', {}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+11. TABLA: RECOMPENSA_USUARIO
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Tabla de relacion muchos-a-muchos que registra qué recompensas ha obtenido cada 
+usuario. Almacena la fecha de obtencion y si ya fue consumida.
+
+CAMPOS PRINCIPALES:
+- id_usuario (STRING UUID, PK, FK -> usuario.id_usuario): Usuario
+- id_recompensa (STRING UUID, PK, FK -> recompensa.id_recompensa): Recompensa
+- fecha_obtenida (DATETIME): Cuando se otorgo la recompensa
+- consumida (BOOLEAN): Si el usuario ya la consumio/uso
+
+RELACIONES CON OTRAS TABLAS:
+- recompensa_usuario -> usuario: Muchos a Uno
+- recompensa_usuario -> recompensa: Muchos a Uno
+
+RUTAS BACKEND:
+Gestionada indirectamente a traves de recompensa_routes.py:
+- GET /api/recompensa/usuario/<usuario_id> (obtiene recompensas del usuario)
+- POST /api/recompensa/<recompensa_id>/otorgar (otorga recompensa a usuario)
+- PUT /api/recompensa/usuario/consumir (marca como consumida)
+
+JSON ESPERADO DEL FRONTEND (POST otorgar):
+{
+  "usuario_id": "550e8400-e29b-41d4-a716-446655440001"
+}
+
+JSON ESPERADO DEL FRONTEND (PUT consumir):
+{
+  "id_recompensa": "550e8400-e29b-41d4-a716-446655440000"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_usuario": "550e8400-e29b-41d4-a716-446655440001",
+  "id_recompensa": "550e8400-e29b-41d4-a716-446655440000",
+  "fecha_obtenida": "2025-01-20T10:30:00",
+  "consumida": false
+}
+
+DONDE SE USA EN FRONTEND:
+- Pagina de recompensas: Ver recompensas obtenidas
+- Componentes de badge/achievements: Mostrar logros
+- services/recompensasService.jsx
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener recompensas obtenidas por el usuario
+axios.get('/api/recompensa/usuario/550e8400-e29b-41d4-a716-446655440001', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Otorgar recompensa a usuario (admin)
+axios.post('/api/recompensa/550e8400-e29b-41d4-a716-446655440000/otorgar', {
+  usuario_id: '550e8400-e29b-41d4-a716-446655440001'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Consumir/usar una recompensa
+axios.put('/api/recompensa/usuario/consumir', {
+  id_recompensa: '550e8400-e29b-41d4-a716-446655440000'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+12. TABLA: SESION_TECNICA_PARAM (SesionTecnicaParam)
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Almacena parametros adicionales y configurables de cada sesion. Permite guardar 
+ajustes especificos como intensidad, musica, duracion personalizada, etc.
+
+CAMPOS PRINCIPALES:
+- id_param (STRING UUID, PK): Identificador unico
+- id_sesion (STRING UUID, FK -> sesion.id_sesion): Sesion asociada
+- parametro (STRING 100): Nombre del parametro (ej: intensidad, musica)
+- valor (STRING 100): Valor del parametro (ej: alta, si)
+
+RELACIONES CON OTRAS TABLAS:
+- sesion_tecnica_param -> sesion: Muchos a Uno
+
+RUTAS BACKEND:
+Gestionada indirectamente como parte de sesion_routes.py
+
+JSON ESPERADO DEL FRONTEND (dentro de POST sesion):
+{
+  "tecnica_id": "550e8400...",
+  "parametros": [
+    {"parametro": "intensidad", "valor": "alta"},
+    {"parametro": "musica", "valor": "clasica"},
+    {"parametro": "duracion", "valor": "30"}
+  ]
+}
+
+JSON QUE DEVUELVE EL BACKEND (GET sesion):
+{
+  "parametros": [
+    {"id_param": "550e8400...", "id_sesion": "550e8400...", 
+     "parametro": "intensidad", "valor": "alta"},
+    {"id_param": "550e8400...", "id_sesion": "550e8400...", 
+     "parametro": "musica", "valor": "clasica"}
+  ]
+}
+
+DONDE SE USA EN FRONTEND:
+- Componentes de sesion: Guardar configuracion de sesion
+- Formularios de tecnicas: Permitir parametros personalizados
+
+================================================================================
+13. TABLA: SALA_SESION
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Tabla de relacion muchos-a-muchos entre salas y sesiones. Vincula sesiones 
+grupales con las salas en las que ocurren.
+
+CAMPOS PRINCIPALES:
+- id_sala (STRING UUID, PK, FK -> sala.id_sala): Sala
+- id_sesion (STRING UUID, PK, FK -> sesion.id_sesion): Sesion grupal
+
+RELACIONES CON OTRAS TABLAS:
+- sala_sesion -> sala: Muchos a Uno
+- sala_sesion -> sesion: Muchos a Uno
+
+RUTAS BACKEND:
+Gestionada como parte de sesion_routes.py (cuando es_grupal=true)
+
+JSON ESPERADO DEL FRONTEND (dentro de POST sesion grupal):
+{
+  "tecnica_id": "550e8400...",
+  "es_grupal": true,
+  "sala_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_sala": "550e8400-e29b-41d4-a716-446655440000",
+  "id_sesion": "550e8400-e29b-41d4-a716-446655440001"
+}
+
+DONDE SE USA EN FRONTEND:
+- pages/SesionGrupal.jsx: Sesiones en grupo de una sala
+- Componentes de salas: Mostrar sesiones activas
+
+================================================================================
+14. TABLA: MENSAJE_SALA
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Almacena los mensajes enviados dentro de cada sala. Permite a los usuarios 
+comunicarse en tiempo real dentro de salas colaborativas.
+
+CAMPOS PRINCIPALES:
+- id_mensaje (STRING UUID, PK): Identificador unico
+- id_sala (STRING UUID, FK -> sala.id_sala): Sala donde se envio
+- autor_id (STRING UUID, FK -> usuario.id_usuario): Quien lo envio
+- contenido (TEXT): Texto del mensaje
+- fecha_creacion (DATETIME): Cuando se envio
+
+RELACIONES CON OTRAS TABLAS:
+- mensaje_sala -> sala: Muchos a Uno
+- mensaje_sala -> usuario: Muchos a Uno
+
+RUTAS BACKEND:
+- GET /api/sala/<sala_id>/mensajes (obtiene mensajes de una sala)
+- POST /api/sala/<sala_id>/mensajes (envia nuevo mensaje)
+- PUT /api/sala/<sala_id>/mensajes/<id_mensaje> (edita mensaje)
+- DELETE /api/sala/<sala_id>/mensajes/<id_mensaje> (elimina mensaje)
+
+JSON ESPERADO DEL FRONTEND (POST enviar mensaje):
+{
+  "contenido": "Hola! Alguien mas para sesion de estudio?"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "id_mensaje": "550e8400-e29b-41d4-a716-446655440000",
+  "id_sala": "550e8400-e29b-41d4-a716-446655440001",
+  "autor_id": "550e8400-e29b-41d4-a716-446655440002",
+  "contenido": "Hola! Alguien mas para sesion de estudio?",
+  "fecha_creacion": "2025-01-20T15:45:00"
+}
+
+DONDE SE USA EN FRONTEND:
+- Componentes de chat: Mostrar y enviar mensajes en salas
+- pages/DetalleSala.jsx: Vista de mensajes de la sala
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Obtener mensajes de una sala
+axios.get('/api/sala/550e8400-e29b-41d4-a716-446655440000/mensajes', {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+// Enviar mensaje en una sala
+axios.post('/api/sala/550e8400-e29b-41d4-a716-446655440000/mensajes', {
+  contenido: 'Hola a todos!'
+}, {
+  headers: { Authorization: 'Bearer TOKEN' }
+})
+
+================================================================================
+15. TABLA: PASSWORD_RESET_CODE
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Almacena codigos temporales de recuperacion de contraseña. Cada codigo tiene 
+expiracion (15 minutos) y marca de consumo.
+
+CAMPOS PRINCIPALES:
+- id (STRING UUID, PK): Identificador unico del registro
+- usuario_id (STRING UUID, FK -> usuario.id_usuario): Usuario que solicito reset
+- code (STRING 10): Codigo numerico (ej: 123456)
+- expires_at (DATETIME): Cuando expira el codigo
+- used (BOOLEAN): Si ya fue utilizado
+
+RELACIONES CON OTRAS TABLAS:
+- password_reset_code -> usuario: Muchos a Uno
+
+RUTAS BACKEND (auth.py):
+- POST /api/auth/request-password-reset (genera codigo)
+- POST /api/auth/reset-password (valida y aplica nuevo password)
+
+JSON ESPERADO DEL FRONTEND (POST request-password-reset):
+{
+  "correo": "usuario@example.com"
+}
+
+JSON ESPERADO DEL FRONTEND (POST reset-password):
+{
+  "correo": "usuario@example.com",
+  "code": "123456",
+  "new_password": "NuevaPassword123!"
+}
+
+JSON QUE DEVUELVE EL BACKEND:
+{
+  "message": "Si existe la cuenta, recibirás un correo con el código de recuperación."
+}
+
+O en modo desarrollo (si SMTP no esta configurado):
+{
+  "message": "No fue posible enviar correo (dev).",
+  "dev_code": "123456"
+}
+
+DONDE SE USA EN FRONTEND:
+- pages/RecuperarContrasena.jsx: Formulario de recuperacion
+- Flujo de autenticacion
+
+EJEMPLOS DE LLAMADAS FETCH/AXIOS:
+// Solicitar codigo de recuperacion
+axios.post('/api/auth/request-password-reset', {
+  correo: 'usuario@example.com'
+})
+
+// Restablecer contraseña
+axios.post('/api/auth/reset-password', {
+  correo: 'usuario@example.com',
+  code: '123456',
+  new_password: 'NuevaPassword123!'
+})
+
+================================================================================
+16. TABLA: ALEMBIC_VERSION
+================================================================================
+
+DESCRIPCION FUNCIONAL:
+Tabla de control de migraciones de la base de datos. Rastrea qué versiones de 
+migraciones se han aplicado. Es gestionada automáticamente por Alembic.
+
+CAMPOS PRINCIPALES:
+- version_num (STRING): Version de migracion (ej: 0001_initial)
+
+RELACIONES: Ninguna
+
+RUTAS BACKEND: N/A (gestionada internamente)
+
+JSON: N/A (no es accesible desde API)
+
+DONDE SE USA EN FRONTEND: N/A (interno del backend)
+
+GESTION DE MIGRACIONES:
+Comandos en terminal:
+- alembic revision --autogenerate -m "descripcion"
+- alembic upgrade head
+- alembic downgrade -1
+
+================================================================================
+FLUJOS PRINCIPALES DEL SISTEMA
+================================================================================
+
+FLUJO DE AUTENTICACION:
+1. Usuario registra: POST /api/auth/register con username, correo, password
+2. Backend hashea password y crea Usuario con rol por defecto
+3. Usuario login: POST /api/auth/login con credenciales
+4. Backend valida y retorna JWT token
+5. Frontend almacena token en localStorage
+6. Cada peticion posterior incluye token en header Authorization
+
+FLUJO DE SESION DE ESTUDIO:
+1. Usuario selecciona tecnica: GET /api/tecnica
+2. Usuario inicia sesion: POST /api/sesion con tecnica_id
+3. Backend crea Sesion con estado "EnProgreso"
+4. Usuario finaliza sesion: PUT /api/sesion/<id> con estado "Completado"
+5. Backend calcula duracion_real y actualiza progreso
+6. Frontend consulta progreso actualizado: GET /api/progreso/hoy
+
+FLUJO DE SALA COLABORATIVA:
+1. Usuario crea sala: POST /api/sala con datos
+2. Backend asigna creador_id y genera codigo_acceso si es privada
+3. Sistema agrega creador a UsuarioSala con rol "lider"
+4. Otros usuarios se unen: POST /api/sala/<id>/unirse-privada
+5. Sistema verifica codigo y agrega usuario a UsuarioSala
+6. Usuarios visualizan participantes: GET /api/sala/<id>
+7. Usuarios envian mensajes: POST /api/sala/<id>/mensajes
+8. Usuarios inician sesion grupal: POST /api/sesion con es_grupal=true
+
+FLUJO DE TAREAS:
+1. Usuario crea tarea: POST /api/tarea con fecha_vencimiento
+2. Backend crea Tarea con estado "Pendiente"
+3. Usuario actualiza estado: PUT /api/tarea/<id> con estado "Completado"
+4. Sistema registra en Progreso
+5. Usuario lista tareas con filtros: GET /api/tarea?estado=Pendiente
+
+FLUJO DE RECOMPENSAS:
+1. Sistema verifica condiciones (sesiones, puntos, tareas)
+2. Si se cumplen, otorga Recompensa: Crear RecompensaUsuario
+3. Usuario ve recompensas: GET /api/recompensa
+4. Usuario ve recompensas personales en dashboard
+5. Usuario marca como consumida: PUT /api/recompensa/usuario/consumir
+
+================================================================================
+NOTAS DE IMPLEMENTACION
+================================================================================
+
+TOKEN JWT:
+- Generado con flask-jwt-extended
+- Expiracion configurada en backend
+- Almacenado en localStorage del frontend
+- Incluido en header Authorization: Bearer TOKEN
+
+VALIDACIONES BACKEND:
+- Email unico y formato valido (regex en validators.py)
+- Password minimo 8 caracteres, mayuscula, numero (validators.py)
+- UUID para IDs principales
+- Foreign keys para integridad referencial
+- Soft deletes para Usuario (campo activo)
+
+MANEJO DE ERRORES:
+- 400: Solicitud invalida (datos faltantes o incorrectos)
+- 401: No autenticado o token expirado
+- 403: No autorizado (sin permisos)
+- 404: Recurso no encontrado
+- 500: Error interno del servidor
+
+INTERCEPTORES FRONTEND:
+- api.jsx agrega token automaticamente a cada peticion
+- Maneja 401 eliminando credenciales
+- Devuelve error para que componentes manejen
+
+ESTRUCTURA DE CARPETAS BACKEND:
+app/
+  models/ (16 archivos, cada uno define una tabla)
+  routes/ (11 archivos de endpoints)
+  controllers/ (logica de negocio)
+  services/ (servicios reutilizables como RecompensaService)
+  utils/ (validadores, email, etc)
+  config/ (configuracion de base de datos)
+
+ESTRUCTURA DE CARPETAS FRONTEND:
+src/
+  services/ (api.jsx, auth.jsx, tareas.jsx, etc - llamadas HTTP)
+  pages/ (vistas completas)
+  components/ (componentes reutilizables)
+  IMG/ (imagenes)
+  assets/ (recursos estáticos)
+
+CONFIGURACION BASE DE DATOS:
+- Motor: MySQL 8.0+
+- Base de datos: synapse_db
+- Usuario por defecto: root
+- Migraciones: Alembic (backend/migrations/)
+- ORM: SQLAlchemy con Flask-SQLAlchemy
+
+================================================================================
+CAMBIOS RECIENTES Y NOTAS IMPORTANTES
+================================================================================
+
+1. USUARIO: Se agregaron campos de perfil (nombre_completo, telefono, ubicacion, 
+   fecha_nacimiento, descripcion, preferencias) para mejorar perfiles de usuarios.
+
+2. TECNICA: Se agregó campo categoria para clasificar tecnicas por tipo 
+   (meditacion, productividad, respiracion, etc).
+
+3. SESION: Campo duracion_real registra tiempo real vs estimado. Campo estado 
+   permite rastrear diferentes fases de la sesion.
+
+4. SALA: Sistema de codigo_acceso de 6 caracteres para salas privadas. 
+   max_participantes permite limitar aforo.
+
+5. PASSWORD_RESET: Sistema de recuperacion con codigos numericos por correo, 
+   válidos 15 minutos, con tabla de seguimiento.
+
+6. ESTADO_ANIMO: Nueva tabla para rastrear bienestar emocional. Query promedia 
+   valores diarios para graficos.
+
+7. JWT: Token basado en id_usuario para todas las rutas autenticadas.
+
+8. SOFT DELETE: Usuario usa campo activo en lugar de eliminar registros.
+
+9. PARAMETROS SESION: Flexibilidad para diferentes configuraciones de tecnicas 
+   mediante tabla SesionTecnicaParam.
+
+10. RECOMPENSAS: Sistema gamificado con requisitos JSON para condiciones complejas.
+
+================================================================================
