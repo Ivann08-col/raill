@@ -8,11 +8,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # Copiar y instalar dependencias
-COPY requirements.txt ./
+# Copiar requirements desde el contexto de repo (Railway envía el repo root como contexto)
+COPY backend/requirements.txt ./
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del proyecto
-COPY . .
+# Copiar solo los archivos del backend al contenedor
+COPY backend/. .
 
 # Puerto por defecto (Railway provee $PORT en runtime)
 EXPOSE 5000
